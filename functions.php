@@ -106,11 +106,29 @@ function thecrisisacademy_enqueue_scripts() {
 	wp_dequeue_style( 'stories-style' );
 	wp_deregister_style( 'stories-style' );
 
+	// Desencola loop.css del tema padre en plantillas Corporate e Individuals si no hay noticias existentes
+	if ( is_page_template( 'templates/corporate.php' ) || is_page_template( 'templates/individuals.php' ) ) {
+		$news_counts = wp_count_posts( 'news' );
+		$has_news    = ! empty( $news_counts->publish ) && ( (int) $news_counts->publish > 0 );
+
+		if ( ! $has_news ) {
+			wp_dequeue_style( 'stories-loop' );
+			wp_deregister_style( 'stories-loop' );
+			if ( function_exists( 'stories_get_loop_design' ) ) {
+				$loop_design = stories_get_loop_design();
+				wp_dequeue_style( "stories-loop-{$loop_design}" );
+				wp_deregister_style( "stories-loop-{$loop_design}" );
+			}
+			wp_dequeue_style( 'stories-posts' );
+			wp_deregister_style( 'stories-posts' );
+		}
+	}
+
 	// Enqueue child theme stylesheet after parent core styles.
 	wp_enqueue_style(
 		'thecrisisacademy-style',
 		get_stylesheet_uri(),
-		array( 'stories-main' ), // <-- Se elimina 'stories-parent-style' de aquí
+		array( 'stories-main' ),
 		file_exists( THECRISISACADEMY_DIR . '/style.css' ) ? filemtime( THECRISISACADEMY_DIR . '/style.css' ) : THECRISISACADEMY_VERSION
 	);
 
