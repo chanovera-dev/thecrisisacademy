@@ -155,14 +155,10 @@ require_once THECRISISACADEMY_DIR . '/inc/colors.php';
 require_once THECRISISACADEMY_DIR . '/inc/ajax-news.php';
 
 /**
- * Corporate Custom Field Groups & Repeaters (Native ACF-alternative)
+ * Page Custom Field Groups & Repeaters (Native ACF-alternative)
+ * Centralizes all landing page fields (Corporate, Individuals, Team, etc.)
  */
-require_once THECRISISACADEMY_DIR . '/inc/corporate-fields.php';
-
-/**
- * Individuals Custom Field Groups & Repeaters (Native ACF-alternative)
- */
-require_once THECRISISACADEMY_DIR . '/inc/individuals-fields.php';
+require_once THECRISISACADEMY_DIR . '/inc/page-fields.php';
 
 /**
  * Corporate SEO & Schema.org JSON-LD Structured Data
