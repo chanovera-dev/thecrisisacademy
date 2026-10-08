@@ -30,7 +30,7 @@ $allowed_title_tags = array(
     <div class="hero-glow"></div>
     <div class="content content-grid">
         <div class="text">
-            <span class="sub-heading pretext-reveal"><?php echo esc_html( $preheading ); ?></span>
+            <span class="sub-heading warning pretext-reveal"><?php echo esc_html( $preheading ); ?></span>
             <h1 class="page-title"><?php echo wp_kses( $title, $allowed_title_tags ); ?></h1>
             
             <?php if ( ! empty( $points ) ) : 

@@ -150,17 +150,19 @@ function initHeroCrisisGrid(...crisisTags) {
 
     /* ── Sizing ──────────────────────────────────────────────── */
     function resize() {
-        const rect = hero.getBoundingClientRect();
         dpr = 1.0; // Optimized memory footprint
-        W = rect.width;
-        H = rect.height;
+        W = hero.clientWidth || hero.offsetWidth || window.innerWidth;
+        H = hero.clientHeight || hero.offsetHeight || window.innerHeight;
         isMobile = W < 768;
 
-        canvas.width = Math.round(W * dpr);
-        canvas.height = Math.round(H * dpr);
-        canvas.style.width = W + 'px';
-        canvas.style.height = H + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const targetW = Math.round(W * dpr);
+        const targetH = Math.round(H * dpr);
+
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+            canvas.width = targetW;
+            canvas.height = targetH;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
 
         // Position cluster centers if first time
         if (clusters[0].x === 0 && W > 0 && H > 0) {
@@ -678,7 +680,10 @@ function initHeroCrisisGrid(...crisisTags) {
     let rt;
     window.addEventListener('resize', () => {
         clearTimeout(rt);
-        rt = setTimeout(() => { resize(); heroRect = hero.getBoundingClientRect(); }, 200);
+        rt = setTimeout(() => {
+            heroRect = null;
+            resize();
+        }, 150);
     }, { passive: true });
 
     init();

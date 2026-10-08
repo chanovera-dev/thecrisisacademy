@@ -1752,27 +1752,29 @@ function initStickyOverlapEffect() {
             return;
         }
 
-        blocks.forEach((block, index) => {
-            if (index === blocks.length - 1) {
-                if (block.classList.contains('is-bottom')) {
-                    block.classList.remove('is-bottom');
-                    block.dispatchEvent(new CustomEvent('block:bottomChange', { detail: { isBottom: false } }));
-                }
-                return;
-            }
+        const states = [];
+        const threshold = window.innerHeight * 0.5;
+        for (let i = 0; i < blocks.length - 1; i++) {
+            const nextTop = blocks[i + 1].getBoundingClientRect().top;
+            states.push(nextTop <= threshold);
+        }
 
-            const nextBlock = blocks[index + 1];
-            const nextTop = nextBlock.getBoundingClientRect().top;
-
-            // Start dimming when the next block is within 50% of the viewport
-            const shouldBeBottom = nextTop <= window.innerHeight * 0.5;
+        for (let i = 0; i < states.length; i++) {
+            const block = blocks[i];
+            const shouldBeBottom = states[i];
             const wasBottom = block.classList.contains('is-bottom');
 
             if (shouldBeBottom !== wasBottom) {
                 block.classList.toggle('is-bottom', shouldBeBottom);
                 block.dispatchEvent(new CustomEvent('block:bottomChange', { detail: { isBottom: shouldBeBottom } }));
             }
-        });
+        }
+
+        const lastBlock = blocks[blocks.length - 1];
+        if (lastBlock && lastBlock.classList.contains('is-bottom')) {
+            lastBlock.classList.remove('is-bottom');
+            lastBlock.dispatchEvent(new CustomEvent('block:bottomChange', { detail: { isBottom: false } }));
+        }
     }
 
     window.addEventListener('scroll', updateOverlap, { passive: true });
@@ -2156,7 +2158,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (direction && !isMobile) {
             cards.forEach(card => card.classList.remove("from-next", "from-prev"));
-            void section.offsetWidth; // Force reflow to replay CSS keyframes
         }
 
         // Render cards

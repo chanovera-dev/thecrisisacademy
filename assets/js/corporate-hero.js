@@ -150,17 +150,19 @@ function initHeroCrisisGrid(...crisisTags) {
 
     /* ── Sizing ──────────────────────────────────────────────── */
     function resize() {
-        const rect = hero.getBoundingClientRect();
         dpr = 1.0; // Optimized memory footprint
-        W = rect.width;
-        H = rect.height;
+        W = hero.clientWidth || hero.offsetWidth || window.innerWidth;
+        H = hero.clientHeight || hero.offsetHeight || window.innerHeight;
         isMobile = W < 768;
 
-        canvas.width = Math.round(W * dpr);
-        canvas.height = Math.round(H * dpr);
-        canvas.style.width = W + 'px';
-        canvas.style.height = H + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const targetW = Math.round(W * dpr);
+        const targetH = Math.round(H * dpr);
+
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+            canvas.width = targetW;
+            canvas.height = targetH;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
 
         // Position cluster centers if first time
         if (clusters[0].x === 0 && W > 0 && H > 0) {
@@ -678,7 +680,10 @@ function initHeroCrisisGrid(...crisisTags) {
     let rt;
     window.addEventListener('resize', () => {
         clearTimeout(rt);
-        rt = setTimeout(() => { resize(); heroRect = hero.getBoundingClientRect(); }, 200);
+        rt = setTimeout(() => {
+            heroRect = null;
+            resize();
+        }, 150);
     }, { passive: true });
 
     init();
@@ -823,18 +828,30 @@ function initDownChart() {
         lineGrad.addColorStop(1.00, '#dc2626');
     }
 
-    function resize() {
-        const rect = canvas.getBoundingClientRect();
-        if (!rect.width || !rect.height) return;
+    function resize(newW, newH) {
+        let w = typeof newW === 'number' && newW > 0 ? newW : (canvas.clientWidth || canvas.offsetWidth);
+        let h = typeof newH === 'number' && newH > 0 ? newH : (canvas.clientHeight || canvas.offsetHeight);
 
-        dpr = 1.0;
-        width = rect.width;
-        height = rect.height;
-        canvas.width = Math.round(width * dpr);
-        canvas.height = Math.round(height * dpr);
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(dpr, dpr);
-        updateGradients();
+        if (!w || !h) {
+            const rect = canvas.getBoundingClientRect();
+            w = rect.width;
+            h = rect.height;
+        }
+        if (!w || !h) return;
+
+        width = w;
+        height = h;
+
+        const targetW = Math.round(width * dpr);
+        const targetH = Math.round(height * dpr);
+
+        if (canvas.width !== targetW || canvas.height !== targetH) {
+            canvas.width = targetW;
+            canvas.height = targetH;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            updateGradients();
+        }
 
         if (startTime) {
             render(performance.now(), chartState.progress || 1.0);
@@ -1165,13 +1182,17 @@ function initDownChart() {
         }
     }
 
-    canvas.style.cursor = 'crosshair';
+    let chartRect = null;
 
-    // Mouse interactions (Instant repaint, zero idle rAF loops)
+    // Mouse interactions (Cached rect, zero layout thrashing on move)
+    canvas.addEventListener('mouseenter', () => {
+        chartRect = canvas.getBoundingClientRect();
+    }, { passive: true });
+
     canvas.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        mouseX = e.clientX - rect.left;
-        mouseY = e.clientY - rect.top;
+        if (!chartRect) chartRect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - chartRect.left;
+        mouseY = e.clientY - chartRect.top;
         isHovering = true;
         if (typeof gsap !== 'undefined') {
             render(performance.now(), chartState.progress >= 1 ? 1.0 : chartState.progress);
@@ -1182,6 +1203,7 @@ function initDownChart() {
 
     canvas.addEventListener('mouseleave', () => {
         isHovering = false;
+        chartRect = null;
         mouseX = -1;
         mouseY = -1;
         if (typeof gsap !== 'undefined') {
@@ -1194,9 +1216,9 @@ function initDownChart() {
     // Touch interactions
     function handleTouch(e) {
         if (e.touches && e.touches.length > 0) {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.touches[0].clientX - rect.left;
-            mouseY = e.touches[0].clientY - rect.top;
+            if (!chartRect) chartRect = canvas.getBoundingClientRect();
+            mouseX = e.touches[0].clientX - chartRect.left;
+            mouseY = e.touches[0].clientY - chartRect.top;
             isHovering = true;
             if (typeof gsap !== 'undefined') {
                 render(performance.now(), chartState.progress >= 1 ? 1.0 : chartState.progress);
@@ -1209,6 +1231,7 @@ function initDownChart() {
     canvas.addEventListener('touchmove', handleTouch, { passive: true });
     canvas.addEventListener('touchend', () => {
         isHovering = false;
+        chartRect = null;
         mouseX = -1;
         mouseY = -1;
         if (typeof gsap !== 'undefined') {
@@ -1222,11 +1245,16 @@ function initDownChart() {
 
     // Use ResizeObserver for responsive adaptation
     if (window.ResizeObserver) {
-        const ro = new ResizeObserver(() => {
-            resize();
+        const ro = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                const cr = entry.contentRect;
+                if (cr && cr.width > 0 && cr.height > 0) {
+                    resize(cr.width, cr.height);
+                    break;
+                }
+            }
         });
         ro.observe(canvas);
-        if (dataBlock) ro.observe(dataBlock);
     }
     window.addEventListener('resize', resize, { passive: true });
 

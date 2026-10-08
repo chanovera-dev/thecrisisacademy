@@ -4126,6 +4126,10 @@
         pointer-events: none;
     }
 
+    & #down-chart-canvas {
+        cursor: crosshair;
+    }
+
     & .content {
         position: relative;
         z-index: 2;
