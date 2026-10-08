@@ -14,66 +14,18 @@ add_action( 'tca_lightbox_panes', function () {
 	get_template_part( 'template-parts/individuals/how-works-panes' );
 } );
 
-// Retrieve ACF field values with safe fallback to defaults
-$preheading = function_exists( 'get_field' ) ? get_field( 'how_works_preheading' ) : '';
-$title      = function_exists( 'get_field' ) ? get_field( 'how_works_title' ) : '';
+// Retrieve field values using native helper with safe fallbacks
+$how_works_data = function_exists( 'thecrisisacademy_get_individuals_how_works_data' )
+	? thecrisisacademy_get_individuals_how_works_data()
+	: array(
+		'preheading' => '¿Cómo funciona?',
+		'title'      => 'Tres soluciones para fortalecer tu preparación ante una crisis',
+		'items'      => function_exists( 'thecrisisacademy_get_default_how_works_items_rows' ) ? thecrisisacademy_get_default_how_works_items_rows() : array(),
+	);
 
-if ( empty( $preheading ) ) {
-	$preheading = '¿Cómo funciona?';
-}
-if ( empty( $title ) ) {
-	$title = 'Tres soluciones para fortalecer tu preparación ante una crisis';
-}
-
-$how_works_items = array();
-
-if ( function_exists( 'have_rows' ) && have_rows( 'how_works_items' ) ) {
-	while ( have_rows( 'how_works_items' ) ) {
-		the_row();
-		$how_works_items[] = array(
-			'department'      => get_sub_field( 'department' ),
-			'radar_code'      => get_sub_field( 'radar_code' ),
-			'number'          => get_sub_field( 'number' ),
-			'title'           => get_sub_field( 'title' ),
-			'description'     => get_sub_field( 'description' ),
-			'bullets'         => get_sub_field( 'bullets' ),
-			'button_label'    => get_sub_field( 'button_label' ),
-			'lightbox_target' => get_sub_field( 'lightbox_target' ),
-		);
-	}
-} elseif ( function_exists( 'get_field' ) ) {
-	$raw_items = get_field( 'how_works_items' );
-	if ( ! empty( $raw_items ) && is_array( $raw_items ) ) {
-		foreach ( $raw_items as $row ) {
-			$how_works_items[] = array(
-				'department'      => $row['department'] ?? ( $row['field_how_works_item_dept'] ?? '' ),
-				'radar_code'      => $row['radar_code'] ?? ( $row['field_how_works_item_radar_code'] ?? '' ),
-				'number'          => $row['number'] ?? ( $row['field_how_works_item_number'] ?? '' ),
-				'title'           => $row['title'] ?? ( $row['field_how_works_item_title'] ?? '' ),
-				'description'     => $row['description'] ?? ( $row['field_how_works_item_desc'] ?? '' ),
-				'bullets'         => $row['bullets'] ?? ( $row['field_how_works_item_bullets'] ?? '' ),
-				'button_label'    => $row['button_label'] ?? ( $row['field_how_works_item_button_label'] ?? 'Más info' ),
-				'lightbox_target' => $row['lightbox_target'] ?? ( $row['field_how_works_item_lb_target'] ?? '' ),
-			);
-		}
-	}
-}
-
-if ( empty( $how_works_items ) && function_exists( 'thecrisisacademy_get_default_how_works_items_rows' ) ) {
-	$raw_defaults = thecrisisacademy_get_default_how_works_items_rows();
-	foreach ( $raw_defaults as $row ) {
-		$how_works_items[] = array(
-			'department'      => $row['department'] ?? '',
-			'radar_code'      => $row['radar_code'] ?? '',
-			'number'          => $row['number'] ?? '',
-			'title'           => $row['title'] ?? '',
-			'description'     => $row['description'] ?? '',
-			'bullets'         => $row['bullets'] ?? '',
-			'button_label'    => $row['button_label'] ?? 'Más info',
-			'lightbox_target' => $row['lightbox_target'] ?? '',
-		);
-	}
-}
+$preheading      = $how_works_data['preheading'];
+$title           = $how_works_data['title'];
+$how_works_items = $how_works_data['items'];
 ?>
 <section id="how-works" class="block blue-background-00">
 	<div class="content content-grid">

@@ -57,20 +57,16 @@ if ( empty( $slides ) ) {
 	}
 }
 
-$about_preheading  = function_exists( 'get_field' ) ? get_field( 'about_preheading' ) : null;
-$about_title       = function_exists( 'get_field' ) ? get_field( 'about_title' ) : null;
-$about_subtitle    = function_exists( 'get_field' ) ? get_field( 'about_subtitle' ) : null;
-$about_description = function_exists( 'get_field' ) ? get_field( 'about_description' ) : null;
+$about_data = function_exists( 'thecrisisacademy_get_individuals_about_data' ) ? thecrisisacademy_get_individuals_about_data() : array();
 
-$about_preheading  = ! empty( $about_preheading ) ? $about_preheading : '¿Qué hacemos?';
-$about_title       = ! empty( $about_title ) ? $about_title : 'Entrenamos para proteger un activo crucial: la reputación';
-$about_subtitle    = ! empty( $about_subtitle ) ? $about_subtitle : 'The Crisis Academy es una academia especializada en entrenamiento estratégico para el manejo de crisis reputacionales, comunicación de riesgos y control de narrativa.';
-$about_description = ! empty( $about_description ) ? $about_description : 'Formamos a equipos de crisis, áreas de comunicación, directivos y voceros para actuar con método, rapidez y precisión cuando más se necesita.';
+$about_preheading  = ! empty( $about_data['preheading'] ) ? $about_data['preheading'] : ( function_exists( 'get_field' ) ? get_field( 'about_preheading' ) : '¿Qué hacemos?' );
+$about_title       = ! empty( $about_data['title'] ) ? $about_data['title'] : ( function_exists( 'get_field' ) ? get_field( 'about_title' ) : 'Entrenamos para proteger un activo crucial: la reputación' );
+$about_subtitle    = ! empty( $about_data['subtitle'] ) ? $about_data['subtitle'] : ( function_exists( 'get_field' ) ? get_field( 'about_subtitle' ) : 'The Crisis Academy es una academia especializada en entrenamiento estratégico para el manejo de crisis reputacionales, comunicación de riesgos y control de narrativa.' );
+$about_description = ! empty( $about_data['description'] ) ? $about_data['description'] : ( function_exists( 'get_field' ) ? get_field( 'about_description' ) : 'Formamos a equipos de crisis, áreas de comunicación, directivos y voceros para actuar con método, rapidez y precisión cuando más se necesita.' );
 
-$about_modules_title = function_exists( 'get_field' ) ? get_field( 'about_modules_title' ) : null;
-$about_modules_title = ! empty( $about_modules_title ) ? $about_modules_title : 'Módulos de especialización';
+$about_modules_title = ! empty( $about_data['modules_title'] ) ? $about_data['modules_title'] : ( function_exists( 'get_field' ) ? get_field( 'about_modules_title' ) : 'Módulos de especialización' );
 
-$raw_modules = function_exists( 'get_field' ) ? get_field( 'about_modules' ) : null;
+$raw_modules = ! empty( $about_data['modules'] ) ? $about_data['modules'] : ( function_exists( 'get_field' ) ? get_field( 'about_modules' ) : null );
 $modules     = array();
 
 if ( ! empty( $raw_modules ) && is_array( $raw_modules ) ) {

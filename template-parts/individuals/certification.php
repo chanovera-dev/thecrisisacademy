@@ -5,127 +5,46 @@
  * @package TheCrisisAcademy
  */
 
-// ── 00. Intro ─────────────────────────────────────────────────────────────
-$cert_intro_subheading = function_exists( 'get_field' ) ? get_field( 'cert_intro_subheading' ) : null;
-$cert_intro_title      = function_exists( 'get_field' ) ? get_field( 'cert_intro_title' ) : null;
-$cert_intro_lead       = function_exists( 'get_field' ) ? get_field( 'cert_intro_lead' ) : null;
+$cert_data = function_exists( 'thecrisisacademy_get_individuals_cert_data' )
+	? thecrisisacademy_get_individuals_cert_data()
+	: array();
 
-$cert_intro_subheading = ! empty( $cert_intro_subheading ) ? $cert_intro_subheading : 'Entrenamiento especializado';
-$cert_intro_title      = ! empty( $cert_intro_title ) ? $cert_intro_title : 'La ruta definitiva para convertir a tu equipo en expertos en gestión de crisis';
-$cert_intro_lead       = ! empty( $cert_intro_lead ) ? $cert_intro_lead : 'Cada crisis sin protocolo cuesta reputación, clientes y tiempo que nunca recuperarás.';
+// ── 00. Intro ─────────────────────────────────────────────────────────────
+$cert_intro_subheading = $cert_data['intro_subheading'] ?? 'Entrenamiento especializado';
+$cert_intro_title      = $cert_data['intro_title'] ?? 'La ruta definitiva para convertir a tu equipo en expertos en gestión de crisis';
+$cert_intro_lead       = $cert_data['intro_lead'] ?? 'Cada crisis sin protocolo cuesta reputación, clientes y tiempo que nunca recuperarás.';
 
 // ── 01. El momento crítico ───────────────────────────────────────────────
-$cert_01_number      = function_exists( 'get_field' ) ? get_field( 'cert_01_number' ) : null;
-$cert_01_header_text = function_exists( 'get_field' ) ? get_field( 'cert_01_header_text' ) : null;
-$cert_01_eyebrow     = function_exists( 'get_field' ) ? get_field( 'cert_01_eyebrow' ) : null;
-$cert_01_title       = function_exists( 'get_field' ) ? get_field( 'cert_01_title' ) : null;
-$cert_01_lead        = function_exists( 'get_field' ) ? get_field( 'cert_01_lead' ) : null;
-$cert_01_items       = function_exists( 'get_field' ) ? get_field( 'cert_01_items' ) : null;
-
-$cert_01_number      = ! empty( $cert_01_number ) ? $cert_01_number : '01';
-$cert_01_header_text = ! empty( $cert_01_header_text ) ? $cert_01_header_text : 'El momento crítico';
-$cert_01_eyebrow     = ! empty( $cert_01_eyebrow ) ? $cert_01_eyebrow : 'Cuando todo cambia';
-$cert_01_title       = ! empty( $cert_01_title ) ? $cert_01_title : 'En una crisis, cada decisión cuenta.';
-$cert_01_lead        = ! empty( $cert_01_lead ) ? $cert_01_lead : 'Sin preparación, el tiempo se pierde, las respuestas se improvisan y la comunicación se fragmenta.';
-
-if ( empty( $cert_01_items ) || ! is_array( $cert_01_items ) ) {
-	$cert_01_items = array(
-		array( 'text' => 'Pérdida de tiempo crítico' ),
-		array( 'text' => 'Respuestas improvisadas' ),
-		array( 'text' => 'Daño reputacional' ),
-		array( 'text' => 'Mensajes contradictorios' ),
-	);
-}
+$cert_01_number      = $cert_data['c01_number'] ?? '01';
+$cert_01_header_text = $cert_data['c01_header'] ?? 'El momento crítico';
+$cert_01_eyebrow     = $cert_data['c01_eyebrow'] ?? 'Cuando todo cambia';
+$cert_01_title       = $cert_data['c01_title'] ?? 'En una crisis, cada decisión cuenta.';
+$cert_01_lead        = $cert_data['c01_lead'] ?? 'Sin preparación, el tiempo se pierde, las respuestas se improvisan y la comunicación se fragmenta.';
+$cert_01_items       = $cert_data['c01_items'] ?? array();
 
 // ── 02. La preparación ───────────────────────────────────────────────────
-$cert_02_number      = function_exists( 'get_field' ) ? get_field( 'cert_02_number' ) : null;
-$cert_02_header_text = function_exists( 'get_field' ) ? get_field( 'cert_02_header_text' ) : null;
-$cert_02_eyebrow     = function_exists( 'get_field' ) ? get_field( 'cert_02_eyebrow' ) : null;
-$cert_02_title       = function_exists( 'get_field' ) ? get_field( 'cert_02_title' ) : null;
-$cert_02_lead        = function_exists( 'get_field' ) ? get_field( 'cert_02_lead' ) : null;
-$cert_02_steps       = function_exists( 'get_field' ) ? get_field( 'cert_02_steps' ) : null;
-
-$cert_02_number      = ! empty( $cert_02_number ) ? $cert_02_number : '02';
-$cert_02_header_text = ! empty( $cert_02_header_text ) ? $cert_02_header_text : 'La preparación';
-$cert_02_eyebrow     = ! empty( $cert_02_eyebrow ) ? $cert_02_eyebrow : 'Tu proceso de certificación';
-$cert_02_title       = ! empty( $cert_02_title ) ? $cert_02_title : 'La respuesta no se improvisa. Se entrena.';
-$cert_02_lead        = ! empty( $cert_02_lead ) ? $cert_02_lead : 'Una ruta práctica para pasar del diagnóstico a la acción y medir cómo responde el equipo.';
-
-if ( empty( $cert_02_steps ) || ! is_array( $cert_02_steps ) ) {
-	$cert_02_steps = array(
-		array(
-			'title'       => 'Diagnóstico',
-			'description' => 'Detectamos las necesidades de la institución y definimos objetivos.',
-		),
-		array(
-			'title'       => '6 módulos especializados',
-			'description' => 'Contenido actualizado, casos reales y tendencias.',
-		),
-		array(
-			'title'       => 'Simulación de crisis',
-			'description' => 'Escenarios de alta intensidad en War Room.',
-		),
-		array(
-			'title'       => 'Evaluación y ScoreCard',
-			'description' => 'Medición del desempeño con KPIs: URR, MPR y TTR.',
-		),
-		array(
-			'title'       => 'Certificación',
-			'description' => 'Demuestra tu aprendizaje y recibe tu certificación profesional.',
-		),
-	);
-}
+$cert_02_number      = $cert_data['c02_number'] ?? '02';
+$cert_02_header_text = $cert_data['c02_header'] ?? 'La preparación';
+$cert_02_eyebrow     = $cert_data['c02_eyebrow'] ?? 'Tu proceso de certificación';
+$cert_02_title       = $cert_data['c02_title'] ?? 'La respuesta no se improvisa. Se entrena.';
+$cert_02_lead        = $cert_data['c02_lead'] ?? 'Una ruta práctica para pasar del diagnóstico a la acción y medir cómo responde el equipo.';
+$cert_02_steps       = $cert_data['c02_steps'] ?? array();
 
 // ── 03. El formato ───────────────────────────────────────────────────────
-$cert_03_number      = function_exists( 'get_field' ) ? get_field( 'cert_03_number' ) : null;
-$cert_03_header_text = function_exists( 'get_field' ) ? get_field( 'cert_03_header_text' ) : null;
-$cert_03_eyebrow     = function_exists( 'get_field' ) ? get_field( 'cert_03_eyebrow' ) : null;
-$cert_03_title       = function_exists( 'get_field' ) ? get_field( 'cert_03_title' ) : null;
-$cert_03_lead        = function_exists( 'get_field' ) ? get_field( 'cert_03_lead' ) : null;
-$cert_03_formats     = function_exists( 'get_field' ) ? get_field( 'cert_03_formats' ) : null;
-
-$cert_03_number      = ! empty( $cert_03_number ) ? $cert_03_number : '03';
-$cert_03_header_text = ! empty( $cert_03_header_text ) ? $cert_03_header_text : 'El formato';
-$cert_03_eyebrow     = ! empty( $cert_03_eyebrow ) ? $cert_03_eyebrow : 'Una ruta a tu medida';
-$cert_03_title       = ! empty( $cert_03_title ) ? $cert_03_title : 'Aprende como mejor funciona para ti.';
-$cert_03_lead        = ! empty( $cert_03_lead ) ? $cert_03_lead : 'Cursa los módulos de manera individual según tus necesidades o completa la ruta para obtener una Constancia Oficial.';
-
-if ( empty( $cert_03_formats ) || ! is_array( $cert_03_formats ) ) {
-	$cert_03_formats = array(
-		array(
-			'icon'        => 'online',
-			'title'       => 'En línea',
-			'description' => 'Cúrsalo en tiempo real.',
-		),
-		array(
-			'icon'        => 'presencial',
-			'title'       => 'Presencial',
-			'description' => 'También disponible en formato presencial intensivo.',
-		),
-	);
-}
+$cert_03_number      = $cert_data['c03_number'] ?? '03';
+$cert_03_header_text = $cert_data['c03_header'] ?? 'El formato';
+$cert_03_eyebrow     = $cert_data['c03_eyebrow'] ?? 'Una ruta a tu medida';
+$cert_03_title       = $cert_data['c03_title'] ?? 'Aprende como mejor funciona para ti.';
+$cert_03_lead        = $cert_data['c03_lead'] ?? 'Cursa los módulos de manera individual según tus necesidades o completa la ruta para obtener una Constancia Oficial.';
+$cert_03_formats     = $cert_data['c03_formats'] ?? array();
 
 // ── 04. El siguiente capítulo ────────────────────────────────────────────
-$cert_04_number      = function_exists( 'get_field' ) ? get_field( 'cert_04_number' ) : null;
-$cert_04_header_text = function_exists( 'get_field' ) ? get_field( 'cert_04_header_text' ) : null;
-$cert_04_title       = function_exists( 'get_field' ) ? get_field( 'cert_04_title' ) : null;
-$cert_04_points      = function_exists( 'get_field' ) ? get_field( 'cert_04_points' ) : null;
-$cert_04_button_text = function_exists( 'get_field' ) ? get_field( 'cert_04_button_text' ) : null;
-$cert_04_button_url  = function_exists( 'get_field' ) ? get_field( 'cert_04_button_url' ) : null;
-
-$cert_04_number      = ! empty( $cert_04_number ) ? $cert_04_number : '04';
-$cert_04_header_text = ! empty( $cert_04_header_text ) ? $cert_04_header_text : 'El siguiente capítulo';
-$cert_04_title       = ! empty( $cert_04_title ) ? $cert_04_title : 'Obtén tu Certificado de Especialización en Comunicación de Crisis.';
-$cert_04_button_text = ! empty( $cert_04_button_text ) ? $cert_04_button_text : 'Inscribirme ahora';
-$cert_04_button_url  = ! empty( $cert_04_button_url ) ? $cert_04_button_url : '#cta';
-
-if ( empty( $cert_04_points ) || ! is_array( $cert_04_points ) ) {
-	$cert_04_points = array(
-		array( 'text' => 'Grupos reducidos garantizados' ),
-		array( 'text' => 'Avalado internacionalmente' ),
-		array( 'text' => 'Instructores expertos en activo' ),
-	);
-}
+$cert_04_number      = $cert_data['c04_number'] ?? '04';
+$cert_04_header_text = $cert_data['c04_header'] ?? 'El siguiente capítulo';
+$cert_04_title       = $cert_data['c04_title'] ?? 'Obtén tu Certificado de Especialización en Comunicación de Crisis.';
+$cert_04_points      = $cert_data['c04_points'] ?? array();
+$cert_04_button_text = $cert_data['c04_btn_text'] ?? 'Inscribirme ahora';
+$cert_04_button_url  = $cert_data['c04_btn_url'] ?? '#cta';
 ?>
 <section id="certification-00" class="block whiteprint-background">
     <div class="content">

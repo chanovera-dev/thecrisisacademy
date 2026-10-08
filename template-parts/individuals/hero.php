@@ -4,11 +4,12 @@
  *
  * @package TheCrisisAcademy
  */
-// Retrieve ACF field values with safe fallback to defaults
-$preheading  = function_exists( 'get_field' ) ? get_field( 'hero_preheading' ) : null;
-$title       = function_exists( 'get_field' ) ? get_field( 'hero_title' ) : null;
-$description = function_exists( 'get_field' ) ? get_field( 'hero_description' ) : null;
-$tags_field  = function_exists( 'get_field' ) ? get_field( 'hero_canvas_tags' ) : null;
+// Retrieve field values with safe fallback to defaults
+$hero_data   = function_exists( 'thecrisisacademy_get_individuals_hero_data' ) ? thecrisisacademy_get_individuals_hero_data() : array();
+$preheading  = ! empty( $hero_data['preheading'] ) ? $hero_data['preheading'] : ( function_exists( 'get_field' ) ? get_field( 'hero_preheading' ) : '' );
+$title       = ! empty( $hero_data['title'] ) ? $hero_data['title'] : ( function_exists( 'get_field' ) ? get_field( 'hero_title' ) : '' );
+$description = ! empty( $hero_data['description'] ) ? $hero_data['description'] : ( function_exists( 'get_field' ) ? get_field( 'hero_description' ) : '' );
+$tags_field  = isset( $hero_data['canvas_tags'] ) ? $hero_data['canvas_tags'] : ( function_exists( 'get_field' ) ? get_field( 'hero_canvas_tags' ) : '' );
 
 // Fallback defaults
 $default_preheading  = 'Especialización en Comunicación para Manejo de Crisis';

@@ -12,46 +12,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$panes = array();
+$how_works_data = function_exists( 'thecrisisacademy_get_individuals_how_works_data' )
+	? thecrisisacademy_get_individuals_how_works_data()
+	: array();
 
-if ( function_exists( 'have_rows' ) && have_rows( 'how_works_panes' ) ) {
-	while ( have_rows( 'how_works_panes' ) ) {
-		the_row();
-		$panes[] = array(
-			'pane_id'         => get_sub_field( 'pane_id' ),
-			'pane_title'      => get_sub_field( 'pane_title' ),
-			'article_number'  => get_sub_field( 'article_number' ),
-			'article_title'   => get_sub_field( 'article_title' ),
-			'article_content' => get_sub_field( 'article_content' ),
-		);
-	}
-} elseif ( function_exists( 'get_field' ) ) {
-	$raw_panes = get_field( 'how_works_panes' );
-	if ( ! empty( $raw_panes ) && is_array( $raw_panes ) ) {
-		foreach ( $raw_panes as $row ) {
-			$panes[] = array(
-				'pane_id'         => $row['pane_id'] ?? ( $row['field_how_works_pane_id'] ?? '' ),
-				'pane_title'      => $row['pane_title'] ?? ( $row['field_how_works_pane_title'] ?? '' ),
-				'article_number'  => $row['article_number'] ?? ( $row['field_how_works_pane_art_num'] ?? '' ),
-				'article_title'   => $row['article_title'] ?? ( $row['field_how_works_pane_art_title'] ?? '' ),
-				'article_content' => $row['article_content'] ?? ( $row['field_how_works_pane_art_content'] ?? '' ),
-			);
-		}
-	}
-}
-
-if ( empty( $panes ) && function_exists( 'thecrisisacademy_get_default_how_works_panes_rows' ) ) {
-	$raw_defaults = thecrisisacademy_get_default_how_works_panes_rows();
-	foreach ( $raw_defaults as $row ) {
-		$panes[] = array(
-			'pane_id'         => $row['pane_id'] ?? '',
-			'pane_title'      => $row['pane_title'] ?? '',
-			'article_number'  => $row['article_number'] ?? '',
-			'article_title'   => $row['article_title'] ?? '',
-			'article_content' => $row['article_content'] ?? '',
-		);
-	}
-}
+$panes = ! empty( $how_works_data['panes'] )
+	? $how_works_data['panes']
+	: ( function_exists( 'thecrisisacademy_get_default_how_works_panes_rows' ) ? thecrisisacademy_get_default_how_works_panes_rows() : array() );
 
 if ( empty( $panes ) ) {
 	return;

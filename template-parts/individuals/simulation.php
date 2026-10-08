@@ -15,35 +15,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$preheading     = function_exists( 'get_field' ) ? get_field( 'simulation_preheading' ) : '';
-$title          = function_exists( 'get_field' ) ? get_field( 'simulation_title' ) : '';
-$intro          = function_exists( 'get_field' ) ? get_field( 'simulation_intro' ) : '';
-$console_status = function_exists( 'get_field' ) ? get_field( 'simulation_console_status' ) : '';
-$sim_cta_url    = function_exists( 'get_field' ) ? get_field( 'simulation_cta_url' ) : '';
-$sim_cta_label  = function_exists( 'get_field' ) ? get_field( 'simulation_cta_label' ) : '';
-$sim_cta_lb     = function_exists( 'get_field' ) ? get_field( 'simulation_cta_lightbox' ) : '';
+$simulation_data = function_exists( 'thecrisisacademy_get_individuals_simulation_data' )
+	? thecrisisacademy_get_individuals_simulation_data()
+	: array(
+		'preheading'     => 'Simulador de crisis',
+		'title'          => 'Experimenta la presión en tiempo real y descubre si tu equipo está preparado',
+		'intro'          => 'Tres etapas, un mismo reloj. Recorre el ciclo completo de una crisis y mide cómo responde tu equipo cuando cada minuto cuenta.',
+		'console_status' => 'Simulación en vivo',
+		'cta_url'        => home_url( '/simulador-de-crisis/' ),
+		'cta_label'      => 'Simular crisis',
+		'cta_lightbox'   => 'crisis-simulator',
+		'stages'         => function_exists( 'thecrisisacademy_get_default_simulation_stages_rows' ) ? thecrisisacademy_get_default_simulation_stages_rows() : array(),
+	);
 
-if ( empty( $preheading ) ) {
-	$preheading = 'Simulador de crisis';
-}
-if ( empty( $title ) ) {
-	$title = 'Experimenta la presión en tiempo real y descubre si tu equipo está preparado';
-}
-if ( empty( $intro ) ) {
-	$intro = 'Tres etapas, un mismo reloj. Recorre el ciclo completo de una crisis y mide cómo responde tu equipo cuando cada minuto cuenta.';
-}
-if ( empty( $console_status ) ) {
-	$console_status = 'Simulación en vivo';
-}
-if ( empty( $sim_cta_url ) ) {
-	$sim_cta_url = home_url( '/simulador-de-crisis/' );
-}
-if ( empty( $sim_cta_label ) ) {
-	$sim_cta_label = 'Simular crisis';
-}
-if ( empty( $sim_cta_lb ) ) {
-	$sim_cta_lb = 'crisis-simulator';
-}
+$preheading     = $simulation_data['preheading'];
+$title          = $simulation_data['title'];
+$intro          = $simulation_data['intro'];
+$console_status = $simulation_data['console_status'];
+$sim_cta_url    = $simulation_data['cta_url'];
+$sim_cta_label  = $simulation_data['cta_label'];
+$sim_cta_lb     = $simulation_data['cta_lightbox'];
+$sim_stages     = $simulation_data['stages'];
 
 // Verify if the Crisis Simulator plugin exists and is activated
 $sim_plugin_rel_path = 'crisis-simulator/simulador-de-crisis.php';
@@ -59,56 +51,6 @@ $is_simulator_active = ( ! empty( $sim_plugin_abs_path ) && file_exists( $sim_pl
 	|| function_exists( 'sdc_simulator_shortcode' )
 	|| in_array( $sim_plugin_rel_path, (array) apply_filters( 'active_plugins', get_option( 'active_plugins', array() ) ), true )
 );
-
-$sim_stages = array();
-
-if ( function_exists( 'have_rows' ) && have_rows( 'simulation_stages' ) ) {
-	while ( have_rows( 'simulation_stages' ) ) {
-		the_row();
-		$sim_stages[] = array(
-			'id'        => get_sub_field( 'id' ),
-			'label'     => get_sub_field( 'label' ),
-			'title'     => get_sub_field( 'title' ),
-			'desc'      => get_sub_field( 'desc' ),
-			'image'     => get_sub_field( 'image' ),
-			'alt'       => get_sub_field( 'alt' ),
-			'kpi'       => get_sub_field( 'kpi' ),
-			'kpi_label' => get_sub_field( 'kpi_label' ),
-		);
-	}
-} elseif ( function_exists( 'get_field' ) ) {
-	$raw_stages = get_field( 'simulation_stages' );
-	if ( ! empty( $raw_stages ) && is_array( $raw_stages ) ) {
-		foreach ( $raw_stages as $row ) {
-			$sim_stages[] = array(
-				'id'        => $row['id'] ?? ( $row['field_sim_stage_id'] ?? '' ),
-				'label'     => $row['label'] ?? ( $row['field_sim_stage_label'] ?? '' ),
-				'title'     => $row['title'] ?? ( $row['field_sim_stage_title'] ?? '' ),
-				'desc'      => $row['desc'] ?? ( $row['field_sim_stage_desc'] ?? '' ),
-				'image'     => $row['image'] ?? ( $row['field_sim_stage_image'] ?? '' ),
-				'alt'       => $row['alt'] ?? ( $row['field_sim_stage_alt'] ?? '' ),
-				'kpi'       => $row['kpi'] ?? ( $row['field_sim_stage_kpi'] ?? '' ),
-				'kpi_label' => $row['kpi_label'] ?? ( $row['field_sim_stage_kpi_label'] ?? '' ),
-			);
-		}
-	}
-}
-
-if ( empty( $sim_stages ) && function_exists( 'thecrisisacademy_get_default_simulation_stages_rows' ) ) {
-	$raw_defaults = thecrisisacademy_get_default_simulation_stages_rows();
-	foreach ( $raw_defaults as $row ) {
-		$sim_stages[] = array(
-			'id'        => $row['id'] ?? '',
-			'label'     => $row['label'] ?? '',
-			'title'     => $row['title'] ?? '',
-			'desc'      => $row['desc'] ?? '',
-			'image'     => $row['image'] ?? '',
-			'alt'       => $row['alt'] ?? '',
-			'kpi'       => $row['kpi'] ?? '',
-			'kpi_label' => $row['kpi_label'] ?? '',
-		);
-	}
-}
 ?>
 <section id="crisis-simulator" class="block whiteprint-background">
 	<div class="content">

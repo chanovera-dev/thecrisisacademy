@@ -160,9 +160,9 @@ require_once THECRISISACADEMY_DIR . '/inc/ajax-news.php';
 require_once THECRISISACADEMY_DIR . '/inc/corporate-fields.php';
 
 /**
- * ACF Field Groups for Individuals Landing Page
+ * Individuals Custom Field Groups & Repeaters (Native ACF-alternative)
  */
-require_once THECRISISACADEMY_DIR . '/inc/acf-individuals-fields.php';
+require_once THECRISISACADEMY_DIR . '/inc/individuals-fields.php';
 
 /**
  * Corporate SEO & Schema.org JSON-LD Structured Data

@@ -14,9 +14,10 @@
  * @version 1.0.0
  */
 
-// Retrieve ACF field values with safe fallback to homepage defaults
-$title    = function_exists( 'get_field' ) ? get_field( 'signals_title' ) : null;
-$subtitle = function_exists( 'get_field' ) ? get_field( 'signals_subtitle' ) : null;
+$signals_data = function_exists( 'thecrisisacademy_get_individuals_signals_data' ) ? thecrisisacademy_get_individuals_signals_data() : array();
+
+$title    = ! empty( $signals_data['title'] ) ? $signals_data['title'] : ( function_exists( 'get_field' ) ? get_field( 'signals_title' ) : null );
+$subtitle = ! empty( $signals_data['subtitle'] ) ? $signals_data['subtitle'] : ( function_exists( 'get_field' ) ? get_field( 'signals_subtitle' ) : null );
 
 // Default fallback content from live homepage
 $default_title    = '<h2 class="title-section title-reveal">La mayoría de las crisis <strong>sí dieron señales</strong> antes de explotar</h2>';
@@ -33,31 +34,28 @@ if ( empty( $subtitle ) ) {
 // Retrieve repeater rows or use live homepage defaults
 $signal_items = array();
 
-if ( function_exists( 'have_rows' ) && have_rows( 'signals_container' ) ) {
+if ( ! empty( $signals_data['container'] ) && is_array( $signals_data['container'] ) ) {
+	foreach ( $signals_data['container'] as $row ) {
+		$signal_items[] = array(
+			'icon'         => $row['icon'] ?? ( $row['signal_item_icon'] ?? null ),
+			'number'       => $row['number'] ?? ( $row['signal_item_number'] ?? '' ),
+			'label'        => $row['label'] ?? ( $row['signal_item_label'] ?? '' ),
+			'info'         => $row['info'] ?? ( $row['signal_item_info'] ?? '' ),
+			'source_label' => $row['source_label'] ?? ( $row['signal_item_source_label'] ?? '' ),
+			'source_url'   => $row['source_url'] ?? ( $row['signal_item_source_url'] ?? '' ),
+		);
+	}
+} elseif ( function_exists( 'have_rows' ) && have_rows( 'signals_container' ) ) {
 	while ( have_rows( 'signals_container' ) ) {
 		the_row();
 		$signal_items[] = array(
-			'icon'         => get_sub_field( 'signal_item_icon' ),
-			'number'       => get_sub_field( 'signal_item_number' ),
-			'label'        => get_sub_field( 'signal_item_label' ),
-			'info'         => get_sub_field( 'signal_item_info' ),
-			'source_label' => get_sub_field( 'signal_item_source_label' ),
-			'source_url'   => get_sub_field( 'signal_item_source_url' ),
+			'icon'         => get_sub_field( 'signal_item_icon' ) ?: get_sub_field( 'icon' ),
+			'number'       => get_sub_field( 'signal_item_number' ) ?: get_sub_field( 'number' ),
+			'label'        => get_sub_field( 'signal_item_label' ) ?: get_sub_field( 'label' ),
+			'info'         => get_sub_field( 'signal_item_info' ) ?: get_sub_field( 'info' ),
+			'source_label' => get_sub_field( 'signal_item_source_label' ) ?: get_sub_field( 'source_label' ),
+			'source_url'   => get_sub_field( 'signal_item_source_url' ) ?: get_sub_field( 'source_url' ),
 		);
-	}
-} elseif ( function_exists( 'get_field' ) ) {
-	$raw_signals = get_field( 'signals_container' );
-	if ( ! empty( $raw_signals ) && is_array( $raw_signals ) ) {
-		foreach ( $raw_signals as $row ) {
-			$signal_items[] = array(
-				'icon'         => $row['signal_item_icon'] ?? ( $row['field_signals_item_icon'] ?? null ),
-				'number'       => $row['signal_item_number'] ?? ( $row['field_signals_item_number'] ?? '' ),
-				'label'        => $row['signal_item_label'] ?? ( $row['field_signals_item_label'] ?? '' ),
-				'info'         => $row['signal_item_info'] ?? ( $row['field_signals_item_info'] ?? '' ),
-				'source_label' => $row['signal_item_source_label'] ?? ( $row['field_signals_item_source_label'] ?? '' ),
-				'source_url'   => $row['signal_item_source_url'] ?? ( $row['field_signals_item_source_url'] ?? '' ),
-			);
-		}
 	}
 }
 
