@@ -12,6 +12,10 @@ $sim_plugin_rel_path = 'crisis-simulator/simulador-de-crisis.php';
 $sim_plugin_abs_path = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR . '/' . $sim_plugin_rel_path : '';
 $sim_cta_label  = function_exists( 'get_field' ) ? get_field( 'simulation_cta_label' ) : '';
 
+if ( empty( $sim_cta_label ) ) {
+	$sim_cta_label = 'Simulador de crisis';
+}
+
 if ( ! function_exists( 'is_plugin_active' ) && defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
 }
