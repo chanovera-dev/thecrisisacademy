@@ -1599,4 +1599,65 @@ add_filter( 'acf/load_value/key=field_how_works_panes', 'thecrisisacademy_acf_lo
 add_filter( 'acf/load_value/name=simulation_stages', 'thecrisisacademy_acf_load_default_value', 10, 3 );
 add_filter( 'acf/load_value/key=field_simulation_stages', 'thecrisisacademy_acf_load_default_value', 10, 3 );
 
+/**
+ * Return default local theme images map for the About gallery section.
+ *
+ * @return array Map of attachment IDs to local filenames in assets/img/about/
+ */
+function thecrisisacademy_get_about_local_gallery_map() {
+	return array(
+		161 => 'mapa-de-stakeholders.webp',
+		162 => 'radar-de-amenazas.webp',
+		163 => 'war-room.webp',
+	);
+}
 
+/**
+ * Filter attachment URL to use local theme asset if it matches the default about gallery images.
+ */
+function thecrisisacademy_filter_about_attachment_url( $url, $post_id ) {
+	$map = thecrisisacademy_get_about_local_gallery_map();
+	if ( isset( $map[ $post_id ] ) ) {
+		return get_stylesheet_directory_uri() . '/assets/img/about/' . $map[ $post_id ];
+	}
+	return $url;
+}
+add_filter( 'wp_get_attachment_url', 'thecrisisacademy_filter_about_attachment_url', 10, 2 );
+
+/**
+ * Filter image downsize to serve the local theme image for default about gallery attachments.
+ */
+function thecrisisacademy_filter_about_image_downsize( $downsize, $id, $size ) {
+	$map = thecrisisacademy_get_about_local_gallery_map();
+	if ( isset( $map[ $id ] ) ) {
+		$url = get_stylesheet_directory_uri() . '/assets/img/about/' . $map[ $id ];
+		return array( $url, 600, 450, true );
+	}
+	return $downsize;
+}
+add_filter( 'image_downsize', 'thecrisisacademy_filter_about_image_downsize', 10, 3 );
+
+/**
+ * Filter attachment data prepared for JavaScript (used in WP Admin / ACF Gallery modal).
+ */
+function thecrisisacademy_filter_about_attachment_for_js( $response, $attachment, $meta ) {
+	$map = thecrisisacademy_get_about_local_gallery_map();
+	$id  = $attachment->ID ?? 0;
+	if ( isset( $map[ $id ] ) ) {
+		$url = get_stylesheet_directory_uri() . '/assets/img/about/' . $map[ $id ];
+		$response['url'] = $url;
+		if ( ! empty( $response['sizes'] ) && is_array( $response['sizes'] ) ) {
+			foreach ( $response['sizes'] as $sz => &$data ) {
+				$data['url'] = $url;
+			}
+		} else {
+			$response['sizes'] = array(
+				'full'      => array( 'url' => $url, 'width' => 600, 'height' => 450, 'orientation' => 'landscape' ),
+				'medium'    => array( 'url' => $url, 'width' => 600, 'height' => 450, 'orientation' => 'landscape' ),
+				'thumbnail' => array( 'url' => $url, 'width' => 600, 'height' => 450, 'orientation' => 'landscape' ),
+			);
+		}
+	}
+	return $response;
+}
+add_filter( 'wp_prepare_attachment_for_js', 'thecrisisacademy_filter_about_attachment_for_js', 10, 3 );

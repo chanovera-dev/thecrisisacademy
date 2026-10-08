@@ -10,20 +10,51 @@
 
 // Retrieve ACF field values with safe fallback to defaults
 $raw_gallery = function_exists( 'get_field' ) ? get_field( 'about_gallery' ) : null;
-$image_ids   = array();
+$slides      = array();
+$theme_uri   = get_stylesheet_directory_uri();
+$default_slides = array(
+	array(
+		'url' => $theme_uri . '/assets/img/about/mapa-de-stakeholders.webp',
+		'alt' => __( 'Mapa de stakeholders', 'thecrisisacademy' ),
+	),
+	array(
+		'url' => $theme_uri . '/assets/img/about/radar-de-amenazas.webp',
+		'alt' => __( 'Radar de amenazas', 'thecrisisacademy' ),
+	),
+	array(
+		'url' => $theme_uri . '/assets/img/about/war-room.webp',
+		'alt' => __( 'War room', 'thecrisisacademy' ),
+	),
+);
+
 if ( ! empty( $raw_gallery ) && is_array( $raw_gallery ) ) {
 	foreach ( $raw_gallery as $item ) {
+		$img_id = 0;
 		if ( is_numeric( $item ) ) {
-			$image_ids[] = (int) $item;
+			$img_id = (int) $item;
 		} elseif ( is_array( $item ) && ! empty( $item['ID'] ) ) {
-			$image_ids[] = (int) $item['ID'];
+			$img_id = (int) $item['ID'];
 		} elseif ( is_array( $item ) && ! empty( $item['id'] ) ) {
-			$image_ids[] = (int) $item['id'];
+			$img_id = (int) $item['id'];
+		}
+
+		if ( $img_id > 0 ) {
+			$img_html = wp_get_attachment_image( $img_id, 'full', false, array( 'loading' => 'lazy', 'decoding' => 'async' ) );
+			if ( ! empty( $img_html ) ) {
+				$slides[] = $img_html;
+			}
 		}
 	}
 }
-if ( empty( $image_ids ) ) {
-	$image_ids = array( 161, 162, 163 );
+
+if ( empty( $slides ) ) {
+	foreach ( $default_slides as $slide ) {
+		$slides[] = sprintf(
+			'<img src="%s" alt="%s" width="600" height="450" loading="lazy" decoding="async" />',
+			esc_url( $slide['url'] ),
+			esc_attr( $slide['alt'] )
+		);
+	}
 }
 
 $about_preheading  = function_exists( 'get_field' ) ? get_field( 'about_preheading' ) : null;
@@ -130,12 +161,12 @@ $total_modules = count( $modules );
         <div class="left-bar container app card-reveal">
             <div class="slideshow--wrapper">
                 <div class="slideshow">
-                    <?php foreach ( $image_ids as $index => $img_id ) : 
+                    <?php foreach ( $slides as $index => $slide_html ) : 
                         $is_active = ( 0 === $index );
                     ?>
                         <article id="about-item-<?php echo esc_attr( $index + 1 ); ?>" class="about-item post animate-in<?php echo $is_active ? ' is-active active' : ''; ?>">
                             <div class="about-content">
-                                <?php echo wp_get_attachment_image( $img_id, 'full', false, array( 'loading' => 'lazy', 'decoding' => 'async' ) ); ?>
+                                <?php echo $slide_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                             </div>
                         </article>
                     <?php endforeach; ?>
@@ -146,7 +177,7 @@ $total_modules = count( $modules );
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-circle" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8m15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-4.5-.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5z"></path></svg>                
                 </button>
                 <div class="slideshow-bullets bullets">
-                    <?php foreach ( $image_ids as $index => $img_id ) : ?>
+                    <?php foreach ( $slides as $index => $slide_html ) : ?>
                         <div class="bullet<?php echo 0 === $index ? ' active' : ''; ?>" data-index="<?php echo esc_attr( $index ); ?>"></div>
                     <?php endforeach; ?>
                 </div>
