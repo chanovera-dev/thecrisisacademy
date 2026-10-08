@@ -10,7 +10,12 @@ $founder_data = function_exists( 'thecrisisacademy_get_founder_data' )
 	? thecrisisacademy_get_founder_data()
 	: array();
 
-$photo_url         = $founder_data['photo_url'] ?? '';
+$photo_url = $founder_data['photo_url'] ?? '';
+if ( empty( $photo_url ) || strpos( (string) $photo_url, 'thecrisisacademy.com/wp-content/themes/crisisacademy/assets/img/carolina-eslava.webp' ) !== false ) {
+	$photo_url = set_url_scheme( get_stylesheet_directory_uri() . '/assets/img/carolina-eslava.webp' );
+} else {
+	$photo_url = set_url_scheme( $photo_url );
+}
 $photo_alt         = $founder_data['photo_alt'] ?? 'Carolina Eslava - Fundadora';
 $preheading        = $founder_data['preheading'] ?? 'Liderazgo Académico';
 $name              = $founder_data['name'] ?? 'Carolina Eslava';
@@ -34,7 +39,7 @@ $stat_label        = $founder_data['stat_label'] ?? 'Ejecutivos entrenados bajo 
 
             <!-- Right Side: Content Bio & Methodology -->
             <div class="founder-text section-header">
-                <span class="sub-heading pretext-reveal" aria-label="<?php echo esc_attr( $preheading ); ?>"><?php echo esc_html( $preheading ); ?></span>
+                <span class="sub-heading warning pretext-reveal" aria-label="<?php echo esc_attr( $preheading ); ?>"><?php echo esc_html( $preheading ); ?></span>
                 <h2 class="title-section founder-name title-reveal"><?php echo esc_html( $name ); ?></h2>
                 <div class="subtitle-section founder-role object-reveal"><?php echo esc_html( $role ); ?></div>
 

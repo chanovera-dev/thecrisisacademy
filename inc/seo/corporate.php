@@ -110,11 +110,13 @@ add_filter( 'document_title_parts', 'thecrisisacademy_corporate_filter_document_
  *
  * @return bool
  */
-function thecrisisacademy_has_active_seo_plugin() {
-	return defined( 'WPSEO_VERSION' ) // Yoast SEO
-		|| defined( 'RANK_MATH_VERSION' ) // Rank Math
-		|| defined( 'AIOSEO_VERSION' ) // All in One SEO
-		|| defined( 'SEOPRESS_VERSION' ); // SEOPress
+if ( ! function_exists( 'thecrisisacademy_has_active_seo_plugin' ) ) {
+	function thecrisisacademy_has_active_seo_plugin() {
+		return defined( 'WPSEO_VERSION' ) // Yoast SEO
+			|| defined( 'RANK_MATH_VERSION' ) // Rank Math
+			|| defined( 'AIOSEO_VERSION' ) // All in One SEO
+			|| defined( 'SEOPRESS_VERSION' ); // SEOPress
+	}
 }
 
 /**

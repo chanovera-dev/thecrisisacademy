@@ -561,8 +561,9 @@ function thecrisisacademy_get_founder_icon_options() {
  * @return array
  */
 function thecrisisacademy_get_founder_defaults() {
+	$theme_uri = ( is_ssl() || strpos( home_url(), 'https://' ) === 0 ) ? set_url_scheme( get_stylesheet_directory_uri(), 'https' ) : set_url_scheme( get_stylesheet_directory_uri() );
 	return array(
-		'photo_url'          => 'https://thecrisisacademy.com/wp-content/themes/crisisacademy/assets/img/carolina-eslava.webp',
+		'photo_url'          => $theme_uri . '/assets/img/carolina-eslava.webp',
 		'photo_alt'          => 'Carolina Eslava - Fundadora',
 		'preheading'         => 'Liderazgo Académico',
 		'name'               => 'Carolina Eslava',
@@ -608,6 +609,11 @@ function thecrisisacademy_get_founder_data( $post_id = null ) {
 	}
 
 	$photo_url         = get_post_meta( $post_id, '_corporate_founder_photo_url', true );
+	if ( empty( $photo_url ) || strpos( (string) $photo_url, 'thecrisisacademy.com/wp-content/themes/crisisacademy/assets/img/carolina-eslava.webp' ) !== false ) {
+		$photo_url = $defaults['photo_url'];
+	} else {
+		$photo_url = ( is_ssl() || strpos( home_url(), 'https://' ) === 0 ) ? set_url_scheme( $photo_url, 'https' ) : set_url_scheme( $photo_url );
+	}
 	$photo_alt         = get_post_meta( $post_id, '_corporate_founder_photo_alt', true );
 	$preheading        = get_post_meta( $post_id, '_corporate_founder_preheading', true );
 	$name              = get_post_meta( $post_id, '_corporate_founder_name', true );
@@ -619,7 +625,7 @@ function thecrisisacademy_get_founder_data( $post_id = null ) {
 	$stat_label        = get_post_meta( $post_id, '_corporate_founder_stat_label', true );
 
 	return array(
-		'photo_url'         => '' !== $photo_url && false !== $photo_url ? $photo_url : $defaults['photo_url'],
+		'photo_url'         => $photo_url,
 		'photo_alt'         => '' !== $photo_alt && false !== $photo_alt ? $photo_alt : $defaults['photo_alt'],
 		'preheading'        => '' !== $preheading && false !== $preheading ? $preheading : $defaults['preheading'],
 		'name'              => '' !== $name && false !== $name ? $name : $defaults['name'],
@@ -2839,6 +2845,7 @@ function thecrisisacademy_render_founder_metabox( $post ) {
 	wp_nonce_field( 'corporate_founder_metabox_save', 'corporate_founder_nonce' );
 
 	$data         = thecrisisacademy_get_founder_data( $post->ID );
+	$defaults     = thecrisisacademy_get_founder_defaults();
 	$icon_options = thecrisisacademy_get_founder_icon_options();
 	?>
 	<div class="tca-metabox-wrapper tca-founder-metabox">
@@ -2936,9 +2943,10 @@ function thecrisisacademy_render_founder_metabox( $post ) {
 					<img id="tca-founder-photo-preview" src="<?php echo esc_url( $data['photo_url'] ); ?>" alt="Preview" />
 				</div>
 				<div class="tca-founder-photo-inputs">
-					<div style="display:flex; gap:8px; margin-bottom:8px;">
-						<input type="text" id="tca_founder_photo_url" name="corporate_founder[photo_url]" value="<?php echo esc_attr( $data['photo_url'] ); ?>" class="regular-text" style="flex:1;" placeholder="https://..." />
-						<button type="button" class="button" id="tca-founder-upload-photo-btn">Subir / Seleccionar Imagen</button>
+					<div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+						<input type="text" id="tca_founder_photo_url" name="corporate_founder[photo_url]" value="<?php echo esc_attr( $data['photo_url'] ); ?>" class="regular-text" style="flex:1; min-width:240px;" placeholder="https://..." />
+						<button type="button" class="button button-primary" id="tca-founder-upload-photo-btn">Subir / Seleccionar Imagen</button>
+						<button type="button" class="button" id="tca-founder-restore-photo-btn" data-default-url="<?php echo esc_attr( $defaults['photo_url'] ); ?>">Restaurar imagen base</button>
 					</div>
 					<div>
 						<label for="tca_founder_photo_alt" style="display:block; font-size:12px; margin-bottom:4px;">Texto Alternativo (Alt)</label>
@@ -3126,6 +3134,20 @@ function thecrisisacademy_render_founder_metabox( $post ) {
 			photoInput.addEventListener('input', function() {
 				const preview = document.getElementById('tca-founder-photo-preview');
 				if (preview) preview.src = this.value;
+			});
+		}
+
+		// Restore Base Photo
+		const restorePhotoBtn = document.getElementById('tca-founder-restore-photo-btn');
+		if (restorePhotoBtn) {
+			restorePhotoBtn.addEventListener('click', function(e) {
+				e.preventDefault();
+				const defUrl = this.getAttribute('data-default-url');
+				if (!defUrl) return;
+				const photoInput = document.getElementById('tca_founder_photo_url');
+				const preview = document.getElementById('tca-founder-photo-preview');
+				if (photoInput) photoInput.value = defUrl;
+				if (preview) preview.src = defUrl;
 			});
 		}
 

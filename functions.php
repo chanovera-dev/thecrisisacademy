@@ -139,10 +139,9 @@ add_action( 'wp_enqueue_scripts', 'thecrisisacademy_enqueue_scripts', 20 );
 
 /**
  * Custom Post Types & Taxonomies
+ * Centralizes all native CPTs (News, Events, FAQ, etc.)
  */
-require_once THECRISISACADEMY_DIR . '/inc/cpt-news.php';
-require_once THECRISISACADEMY_DIR . '/inc/cpt-events.php';
-require_once THECRISISACADEMY_DIR . '/inc/cpt-faq.php';
+require_once THECRISISACADEMY_DIR . '/inc/cpt.php';
 
 /**
  * Color Schemes
@@ -161,14 +160,10 @@ require_once THECRISISACADEMY_DIR . '/inc/ajax-news.php';
 require_once THECRISISACADEMY_DIR . '/inc/page-fields.php';
 
 /**
- * Corporate SEO & Schema.org JSON-LD Structured Data
+ * Page SEO & Schema.org JSON-LD Structured Data
+ * Centralizes all landing page SEO (Corporate, Individuals, etc.)
  */
-require_once THECRISISACADEMY_DIR . '/inc/corporate-seo.php';
-
-/**
- * Individuals SEO & Schema.org JSON-LD Structured Data
- */
-require_once THECRISISACADEMY_DIR . '/inc/individuals-seo.php';
+require_once THECRISISACADEMY_DIR . '/inc/page-seo.php';
 
 /**
  * Get corporate homepage assets
