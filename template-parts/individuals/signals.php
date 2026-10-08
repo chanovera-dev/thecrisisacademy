@@ -223,9 +223,30 @@ if ( empty( $signal_items ) ) {
 								<line x1="50" y1="50" x2="50" y2="10" stroke="rgba(0, 217, 255, 0.2)" stroke-width="1.5" stroke-linecap="round" style="transform-origin: 50px 50px; animation: radar-needle-sweep 3s linear infinite;" />
 								
 								<!-- Fallback static icon inside the center of the spinning ring -->
-								<?php if ( $icon ) : ?>
+								<?php
+								$icon_url = '';
+								if ( is_array( $icon ) && ! empty( $icon['url'] ) ) {
+									$icon_url = set_url_scheme( $icon['url'] );
+								} elseif ( is_string( $icon ) && ( str_starts_with( $icon, 'http://' ) || str_starts_with( $icon, 'https://' ) || str_starts_with( $icon, '/' ) ) ) {
+									$icon_url = set_url_scheme( $icon );
+								}
+								?>
+								<?php if ( ! empty( $icon_url ) ) : ?>
 									<g style="transform: rotate(90deg); transform-origin: 50px 50px;">
-										<image href="<?= esc_url( is_array( $icon ) ? $icon['url'] : $icon ) ?>" x="32" y="32" width="36" height="36" style="opacity: 0.85;" />
+										<image href="<?= esc_url( $icon_url ) ?>" x="32" y="32" width="36" height="36" style="opacity: 0.85;" />
+									</g>
+								<?php elseif ( 'cpu' === $icon ) : ?>
+									<g style="transform: rotate(90deg); transform-origin: 50px 50px;" stroke="#00d9ff" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<rect x="36" y="36" width="28" height="28" rx="4"></rect>
+										<rect x="42" y="42" width="16" height="16"></rect>
+										<line x1="44" y1="31" x2="44" y2="36"></line>
+										<line x1="56" y1="31" x2="56" y2="36"></line>
+										<line x1="44" y1="64" x2="44" y2="69"></line>
+										<line x1="56" y1="64" x2="56" y2="69"></line>
+										<line x1="64" y1="44" x2="69" y2="44"></line>
+										<line x1="64" y1="56" x2="69" y2="56"></line>
+										<line x1="31" y1="44" x2="36" y2="44"></line>
+										<line x1="31" y1="56" x2="36" y2="56"></line>
 									</g>
 								<?php endif; ?>
 
