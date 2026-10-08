@@ -22,7 +22,7 @@ get_header(); ?>
         'corporate'   => [
             'cta',
             'upcoming-events',
-            'news',
+            'news'            => ( (int) ( wp_count_posts( 'news' )->publish ?? 0 ) > 0 ),
             'faq',
             'lightbox',
         ],
