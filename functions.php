@@ -102,25 +102,15 @@ add_action( 'after_switch_theme', 'thecrisisacademy_create_default_pages' );
  * Enqueue scripts and styles for the child theme.
  */
 function thecrisisacademy_enqueue_scripts() {
-	// Parent theme handles 'stories-style' using get_stylesheet_uri(), which resolves
-	// to child style.css. Dequeue and replace it to avoid duplicate loading and ensure
-	// proper cascade order.
+	// Desencola el handle del tema padre para evitar duplicados.
 	wp_dequeue_style( 'stories-style' );
 	wp_deregister_style( 'stories-style' );
-
-	// Enqueue parent theme base stylesheet.
-	wp_enqueue_style(
-		'stories-parent-style',
-		get_template_directory_uri() . '/style.css',
-		array(),
-		file_exists( get_template_directory() . '/style.css' ) ? filemtime( get_template_directory() . '/style.css' ) : THECRISISACADEMY_VERSION
-	);
 
 	// Enqueue child theme stylesheet after parent core styles.
 	wp_enqueue_style(
 		'thecrisisacademy-style',
 		get_stylesheet_uri(),
-		array( 'stories-parent-style', 'stories-main' ),
+		array( 'stories-main' ), // <-- Se elimina 'stories-parent-style' de aquí
 		file_exists( THECRISISACADEMY_DIR . '/style.css' ) ? filemtime( THECRISISACADEMY_DIR . '/style.css' ) : THECRISISACADEMY_VERSION
 	);
 
@@ -136,6 +126,7 @@ function thecrisisacademy_enqueue_scripts() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'thecrisisacademy_enqueue_scripts', 20 );
+
 
 /**
  * Custom Post Types & Taxonomies
