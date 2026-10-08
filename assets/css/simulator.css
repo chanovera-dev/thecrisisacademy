@@ -1,0 +1,273 @@
+.block-breadcrumbs {
+    display: none;
+}
+
+.blue-background-00 {
+    position: relative;
+    background-color: var(--footer-background);
+    background-image: radial-gradient(ellipse 85% 70% at 50% 50%, color-mix(in srgb, var(--color-primary) 10%, transparent) 0%, transparent 65%);
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #fff;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background-image:
+            radial-gradient(circle, color-mix(in srgb, var(--color-primary) 25%, transparent) 1px, transparent 1px);
+        background-size: 40px 40px;
+        background-position: 0 0;
+        mask-image:
+            radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 70%);
+        -webkit-mask-image:
+            radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 70%);
+    }
+
+    @media (width >=768px) {
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background-image:
+                radial-gradient(circle, var(--color-primary) 1px, transparent 1px),
+                radial-gradient(360px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+                    color-mix(in srgb, var(--color-primary) 20%, transparent) 0%,
+                    color-mix(in srgb, var(--color-primary) 8%, transparent) 40%,
+                    transparent 70%);
+            background-size:
+                40px 40px,
+                100% 100%;
+            background-position:
+                0 0,
+                0 0;
+            background-repeat:
+                repeat,
+                no-repeat;
+            mask-image:
+                radial-gradient(660px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 75%);
+            -webkit-mask-image:
+                radial-gradient(660px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), black 0%, transparent 75%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        &:hover::after {
+            opacity: 1;
+        }
+    }
+
+    & .content {
+        position: relative;
+        z-index: 2;
+    }
+}
+
+body.page-template-page-simulator,
+body.page-template-templatespage-simulator-php {
+    background-color: transparent !important;
+}
+
+body.page-template-page-simulator #main,
+body.page-template-templatespage-simulator-php #main {
+    background: transparent !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.sdc-page-section {
+    width: 100%;
+    padding: 2rem 0 3.5rem;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.sdc-section {
+    padding: 1rem 0;
+}
+
+.sdc-page-section .content.sdc-page-content {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.sdc-standalone-dialog {
+    transform: none !important;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1366px;
+    margin: 0 auto;
+    background: #060b19;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 80px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 80px rgba(0, 121, 255, 0.12);
+    border-radius: var(--card-border-radius, 20px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: calc(100vh - 140px);
+    min-height: 680px;
+    max-height: 840px;
+}
+
+.is-chromium .sdc-standalone-dialog {
+    corner-shape: squircle;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-header {
+    height: 56px;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.025);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding: 0 1rem;
+    user-select: none;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sdc-standalone-dialog .lightbox-badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #e2e8f0;
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--minibadge-border-radius, 8px);
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.is-chromium .sdc-standalone-dialog .lightbox-badge-status {
+    corner-shape: squircle;
+}
+
+.sdc-standalone-dialog .lightbox-badge-status .status-pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-primary, #0079ff);
+    box-shadow: 0 0 10px var(--color-primary, #0079ff);
+    animation: statusPulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.sdc-standalone-dialog .corporate-lightbox-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-close-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.38rem 0.75rem;
+    border-radius: var(--minibadge-border-radius, 8px);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.is-chromium .sdc-standalone-dialog .corporate-lightbox-close-btn {
+    corner-shape: squircle;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-close-btn .close-label {
+    display: inline-block;
+    padding: 0.1rem 0.35rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    font-size: 0.68rem;
+    color: #cbd5e1;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-close-btn:hover {
+    background: rgba(0, 121, 255, 0.15);
+    border-color: rgba(0, 121, 255, 0.35);
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.sdc-standalone-dialog .corporate-lightbox-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-body::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+.sdc-standalone-dialog .corporate-lightbox-pane {
+    width: 100%;
+    min-height: 100%;
+    display: grid;
+}
+
+.sdc-standalone-dialog .sdc-simulator-container {
+    background: transparent !important;
+    min-height: 100%;
+}
+
+.sdc-standalone-dialog .sdc-nav-top {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+}
+
+/* Fallback if rendered through plugin raw wrapper */
+#sdc-full-width-wrapper:not(:has(.sdc-standalone-dialog)) {
+    max-width: 1366px;
+    margin: 2rem auto 3rem;
+    background: #060b19;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 80px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 80px rgba(0, 121, 255, 0.12);
+    border-radius: var(--card-border-radius, 20px);
+    overflow: hidden;
+    padding: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+    .sdc-standalone-dialog {
+        height: auto;
+        max-height: none;
+        min-height: auto;
+        border-radius: 12px;
+    }
+}

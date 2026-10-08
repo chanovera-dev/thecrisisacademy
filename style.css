@@ -1,0 +1,317 @@
+/*
+Theme Name: The Crisis Academy
+Theme URI: https://thecrisisacademy.com/
+Author: The Crisis Academy
+Author URI: https://thecrisisacademy.com/
+Description: Child theme for Stories, customized for The Crisis Academy.
+Template: stories
+Version: 1.0.0
+Requires at least: 6.0
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: thecrisisacademy
+*/
+
+/* ==========================================================================
+   Child Theme Custom Styles
+   ========================================================================== */
+
+html {
+   scroll-behavior: smooth;
+}
+
+.logo {
+   --color--logo: var(--color-text-heading);
+   --s: 30px;
+   /* ← ÚNICA MEDIDA A CAMBIAR */
+
+   @media (width >=1200px) {
+      --s: 40px;
+   }
+
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   gap: calc(var(--s) * 0.55);
+
+   /* ─── GLOW RING ─────────────────────────── */
+   & .ring-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      & .glow-ring {
+         position: absolute;
+         width: calc(var(--s) * 1);
+         height: calc(var(--s) * 1);
+         border-radius: 50%;
+         border: 1px solid color-mix(in srgb, var(--color--logo), transparent 65%);
+         pointer-events: none;
+         animation: glowPulse 3s ease-in-out infinite;
+      }
+   }
+
+   /* ─── 3D SCENE ──────────────────────────── */
+   & .scene {
+      width: var(--s);
+      height: var(--s);
+      perspective: calc(var(--s) * 3.75);
+      /* = 600 / 160 * s */
+   }
+
+   /* ─── CUBE ──────────────────────────────── */
+   & .cube {
+      width: var(--s);
+      height: var(--s);
+      position: relative;
+      transform-style: preserve-3d;
+      color: color-mix(in srgb, var(--color--logo), transparent 60%);
+      /* currentColor heredado */
+      animation: spin 12s linear infinite;
+   }
+
+   /* ─── CARAS ─────────────────────────────── */
+   & .face {
+      position: absolute;
+      width: var(--s);
+      height: var(--s);
+      border: 1px solid currentColor;
+      background: rgba(180, 200, 220, 0.03);
+
+      /* translateZ = --s / 2  (mitad del lado del cubo) */
+      &.front {
+         transform: translateZ(calc(var(--s) * 0.5));
+         display: flex;
+         align-items: center;
+         justify-content: center;
+
+         /* ─── OJO IA (cara frontal) ─────────────── */
+         /* ojo = 30% del tamaño del cubo */
+         & .ai-eye {
+            position: relative;
+            width: calc(var(--s) * 0.7);
+            height: calc(var(--s) * 0.7);
+            border: 1px solid var(--color--logo);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+
+            /* pupila = 37.5% del ojo = 11.25% de --s */
+            & .pupil {
+               width: calc(var(--s) * 0.3);
+               height: calc(var(--s) * 0.3);
+               border-radius: 50%;
+               background: #e53e3e;
+               box-shadow:
+                  0 0 calc(var(--s) * 0.07) #e53e3e,
+                  0 0 calc(var(--s) * 0.13) rgba(229, 62, 62, 0.4);
+               animation: eyePulse 2s ease-in-out infinite;
+            }
+
+            /* ─── NODOS ─────────────────────────────── */
+            /* nodo = ~3.3% de --s */
+            & .node {
+               position: absolute;
+               width: calc(var(--s) * 0.033);
+               height: calc(var(--s) * 0.033);
+               background: #8ba3b8;
+               border-radius: 50%;
+               opacity: 0.7;
+
+               &.node-1 {
+                  top: 15%;
+                  left: 20%;
+               }
+
+               &.node-2 {
+                  top: 25%;
+                  right: 18%;
+               }
+
+               &.node-3 {
+                  bottom: 20%;
+                  left: 25%;
+               }
+
+               &.node-4 {
+                  bottom: 30%;
+                  right: 22%;
+               }
+            }
+         }
+      }
+
+      &.back {
+         transform: rotateY(180deg) translateZ(calc(var(--s) * 0.5));
+      }
+
+      &.left {
+         transform: rotateY(-90deg) translateZ(calc(var(--s) * 0.5));
+      }
+
+      &.right {
+         transform: rotateY(90deg) translateZ(calc(var(--s) * 0.5));
+      }
+
+      &.top {
+         transform: rotateX(90deg) translateZ(calc(var(--s) * 0.5));
+      }
+
+      &.bottom {
+         transform: rotateX(-90deg) translateZ(calc(var(--s) * 0.5));
+      }
+   }
+
+   /* ─── REJILLA: 16 cuadrados por cara (4×4) ── */
+   /* Un solo div usa background-image para dibujar
+       3 líneas H + 3 líneas V con opacidad 0.5       */
+   & .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+         linear-gradient(color-mix(in srgb, var(--color--logo), transparent 85%) 1px, transparent 1px),
+         linear-gradient(90deg, color-mix(in srgb, var(--color--logo), transparent 85%) 1px, transparent 1px);
+      background-size: 25% 25%;
+      opacity: 0.5;
+      pointer-events: none;
+   }
+
+   /* ─── TIPOGRAFÍA ─────────────────────────── */
+   /* El bloque de texto ocupa exactamente --s de alto */
+   & .text-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      height: calc(var(--s) * 1.25);
+
+      /* brand-name = 25% de --s */
+      & .brand-name {
+         color: var(--color--logo);
+         font-weight: 900;
+         font-size: calc(var(--s) * 0.55);
+         letter-spacing: 0.12rem;
+         text-transform: uppercase;
+         text-align: left;
+         line-height: 1;
+      }
+
+      & .divider {
+         width: 50%;
+         height: 1px;
+         background: color-mix(in srgb, var(--color--logo), transparent 50%);
+         align-self: stretch;
+      }
+
+      /* tagline = 13.3% de --s */
+      & .tagline {
+         color: color-mix(in srgb, var(--color--logo), transparent 50%);
+         font-weight: 600;
+         font-size: calc(var(--s) * 0.44);
+         letter-spacing: 0.18rem;
+         text-transform: uppercase;
+         text-align: left;
+         line-height: 1;
+         margin: 0;
+
+         @media (width < 450px) {
+            font-size: calc(var(--wp--preset--font-size--small) * .5);
+         }
+      }
+   }
+}
+
+@media (width >=1200px) {
+   #main-header {
+      & .block {
+         & .content {
+            grid-template-columns: 1fr auto auto;
+            padding: 1rem 0;
+
+            & .stories-navigation .main-navigation>ul>li>a {
+               height: 37px;
+               border-radius: var(--badge-border-radius);
+
+               .is-chromium & {
+                  corner-shape: squircle;
+               }
+            }
+         }
+      }
+   }
+}
+
+#main-header .block .content {
+   height: auto;
+   min-height: none;
+   max-height: none;
+}
+
+#main-footer .block.middle-footer .content {
+   flex-direction: row-reverse;
+
+   & .other-links {
+      @media (width >=1024px) {
+         justify-content: flex-start;
+      }
+   }
+
+   & .about {
+      & .logo {
+         margin-bottom: 2rem;
+         --s: 40px;
+         --color--logo: var(--color-text-white);
+
+         & .text-group {
+            & .tagline {
+               font-size: var(--wp--preset--font-size--small);
+            }
+         }
+
+      }
+   }
+}
+
+@keyframes glowPulse {
+
+   0%,
+   100% {
+      box-shadow: 0 0 12px rgba(180, 200, 220, 0.08);
+   }
+
+   50% {
+      box-shadow: 0 0 32px rgba(180, 200, 220, 0.28);
+   }
+}
+
+@keyframes spin {
+   0% {
+      transform: rotateY(-25deg) rotateX(15deg);
+   }
+
+   50% {
+      transform: rotateY(25deg) rotateX(-5deg);
+   }
+
+   100% {
+      transform: rotateY(-25deg) rotateX(15deg);
+   }
+}
+
+@keyframes eyePulse {
+
+   0%,
+   100% {
+      transform: scale(1);
+      opacity: 1;
+   }
+
+   50% {
+      transform: scale(0.7);
+      opacity: 0.6;
+   }
+}
