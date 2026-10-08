@@ -10,11 +10,6 @@
 // Verify if the Crisis Simulator plugin exists and is activated
 $sim_plugin_rel_path = 'crisis-simulator/simulador-de-crisis.php';
 $sim_plugin_abs_path = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR . '/' . $sim_plugin_rel_path : '';
-$sim_cta_label  = function_exists( 'get_field' ) ? get_field( 'simulation_cta_label' ) : '';
-
-if ( empty( $sim_cta_label ) ) {
-	$sim_cta_label = 'Simulador de crisis';
-}
 
 if ( ! function_exists( 'is_plugin_active' ) && defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -38,17 +33,15 @@ $items    = ! empty( $sim_data['items'] ) ? $sim_data['items'] : array();
             <p class="simulation-intro-desc object-reveal">
                 <?= esc_html( $sim_data['description'] ); ?>
             </p>
-            <?php if ( ! empty( $sim_data['cta_text'] ) && ! empty( $sim_data['cta_url'] ) ) : ?>
+            <?php if ( ! empty( $sim_data['cta_text'] ) && ! empty( $sim_data['cta_url'] ) && $is_simulator_active ) : ?>
                 <div class="cta-wrapper object-reveal">
-                    <?php if ( $is_simulator_active ) : ?>
-						<a href="<?php echo esc_url( $sim_cta_url ); ?>" class="btn primary simulator-cta"<?php if ( ! empty( $sim_cta_lb ) ) : ?> data-open-lightbox="<?php echo esc_attr( $sim_cta_lb ); ?>"<?php endif; ?>>
-							<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-								<polyline points="4 17 10 11 4 5"></polyline>
-								<line x1="12" y1="19" x2="20" y2="19"></line>
-							</svg>
-							<span><?php echo esc_html( $sim_cta_label ); ?></span>
-						</a>
-					<?php endif; ?>
+                    <a href="<?= esc_url( $sim_data['cta_url'] ); ?>" class="btn primary"<?php if ( ! empty( $sim_data['cta_lightbox'] ) ) : ?> data-open-lightbox="<?= esc_attr( $sim_data['cta_lightbox'] ); ?>"<?php endif; ?>>
+                        <svg class="terminal-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="4 17 10 11 4 5"></polyline>
+                            <line x1="12" y1="19" x2="20" y2="19"></line>
+                        </svg>
+                        <span><?= esc_html( $sim_data['cta_text'] ); ?></span>
+                    </a>
                 </div>
             <?php endif; ?>
         </div>
