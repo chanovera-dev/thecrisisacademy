@@ -475,7 +475,7 @@ function thecrisisacademy_render_individuals_seo_metabox( $post ) {
 			<!-- SEO Title -->
 			<div>
 				<label for="individuals_seo_title" style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px;">
-					Título SEO (<title> tag y og:title)
+					Título SEO (&lt;title&gt; tag y og:title)
 				</label>
 				<input type="text"
 					id="individuals_seo_title"
