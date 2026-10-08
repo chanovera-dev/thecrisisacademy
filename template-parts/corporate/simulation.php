@@ -7,6 +7,21 @@
  * @package TheCrisisAcademy
  */
 
+// Verify if the Crisis Simulator plugin exists and is activated
+$sim_plugin_rel_path = 'crisis-simulator/simulador-de-crisis.php';
+$sim_plugin_abs_path = defined( 'WP_PLUGIN_DIR' ) ? WP_PLUGIN_DIR . '/' . $sim_plugin_rel_path : '';
+
+if ( ! function_exists( 'is_plugin_active' ) && defined( 'ABSPATH' ) && file_exists( ABSPATH . 'wp-admin/includes/plugin.php' ) ) {
+	require_once ABSPATH . 'wp-admin/includes/plugin.php';
+}
+
+$is_simulator_active = ( ! empty( $sim_plugin_abs_path ) && file_exists( $sim_plugin_abs_path ) ) && (
+	( function_exists( 'is_plugin_active' ) && is_plugin_active( $sim_plugin_rel_path ) )
+	|| shortcode_exists( 'simulador_de_crisis' )
+	|| function_exists( 'sdc_simulator_shortcode' )
+	|| in_array( $sim_plugin_rel_path, (array) apply_filters( 'active_plugins', get_option( 'active_plugins', array() ) ), true )
+);
+
 $sim_data = thecrisisacademy_get_simulation_data();
 $items    = ! empty( $sim_data['items'] ) ? $sim_data['items'] : array();
 ?>
