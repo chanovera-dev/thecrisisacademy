@@ -226,7 +226,8 @@ function crisisacademy_templates() {
 
         function crisisacademy_unload_parts_header() {
             wp_dequeue_style( 'page' );
-			wp_dequeue_style( 'single' );
+			wp_dequeue_style( 'stories-single' );
+			wp_deregister_style( 'stories-single' );
         }
         add_action( 'wp_enqueue_scripts', 'crisisacademy_unload_parts_header', 100 );
 
@@ -250,7 +251,8 @@ function crisisacademy_templates() {
 
         function crisisacademy_unload_parts_header() {
             wp_dequeue_style( 'page' );
-			wp_dequeue_style( 'single' );
+			wp_dequeue_style( 'stories-single' );
+			wp_deregister_style( 'stories-single' );
         }
         add_action( 'wp_enqueue_scripts', 'crisisacademy_unload_parts_header', 100 );
 
