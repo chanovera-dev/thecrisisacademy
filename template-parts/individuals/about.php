@@ -8,10 +8,15 @@
  * @package TheCrisisAcademy
  */
 
-// Retrieve ACF field values with safe fallback to defaults
-$raw_gallery = function_exists( 'get_field' ) ? get_field( 'about_gallery' ) : null;
-$slides      = array();
-$theme_uri   = get_stylesheet_directory_uri();
+// Retrieve data using native helper with safe fallbacks
+$about_data  = function_exists( 'thecrisisacademy_get_individuals_about_data' ) ? thecrisisacademy_get_individuals_about_data() : array();
+$raw_gallery = $about_data['gallery'] ?? ( function_exists( 'get_field' ) ? get_field( 'about_gallery' ) : null );
+if ( is_string( $raw_gallery ) && '' !== trim( $raw_gallery ) ) {
+	$raw_gallery = array_filter( array_map( 'intval', explode( ',', $raw_gallery ) ) );
+}
+
+$slides         = array();
+$theme_uri      = get_stylesheet_directory_uri();
 $default_slides = array(
 	array(
 		'url' => $theme_uri . '/assets/img/about/mapa-de-stakeholders.webp',
@@ -57,12 +62,10 @@ if ( empty( $slides ) ) {
 	}
 }
 
-$about_data = function_exists( 'thecrisisacademy_get_individuals_about_data' ) ? thecrisisacademy_get_individuals_about_data() : array();
-
-$about_preheading  = ! empty( $about_data['preheading'] ) ? $about_data['preheading'] : ( function_exists( 'get_field' ) ? get_field( 'about_preheading' ) : '¿Qué hacemos?' );
-$about_title       = ! empty( $about_data['title'] ) ? $about_data['title'] : ( function_exists( 'get_field' ) ? get_field( 'about_title' ) : 'Entrenamos para proteger un activo crucial: la reputación' );
-$about_subtitle    = ! empty( $about_data['subtitle'] ) ? $about_data['subtitle'] : ( function_exists( 'get_field' ) ? get_field( 'about_subtitle' ) : 'The Crisis Academy es una academia especializada en entrenamiento estratégico para el manejo de crisis reputacionales, comunicación de riesgos y control de narrativa.' );
-$about_description = ! empty( $about_data['description'] ) ? $about_data['description'] : ( function_exists( 'get_field' ) ? get_field( 'about_description' ) : 'Formamos a equipos de crisis, áreas de comunicación, directivos y voceros para actuar con método, rapidez y precisión cuando más se necesita.' );
+$about_preheading  = ! empty( $about_data['preheading'] ) ? $about_data['preheading'] : '¿Qué hacemos?';
+$about_title       = ! empty( $about_data['title'] ) ? $about_data['title'] : 'Entrenamos para proteger un activo crucial: la reputación';
+$about_subtitle    = ! empty( $about_data['subtitle'] ) ? $about_data['subtitle'] : 'The Crisis Academy es una academia especializada en entrenamiento estratégico para el manejo de crisis reputacionales, comunicación de riesgos y control de narrativa.';
+$about_description = ! empty( $about_data['description'] ) ? $about_data['description'] : 'Formamos a equipos de crisis, áreas de comunicación, directivos y voceros para actuar con método, rapidez y precisión cuando más se necesita.';
 
 $about_modules_title = ! empty( $about_data['modules_title'] ) ? $about_data['modules_title'] : ( function_exists( 'get_field' ) ? get_field( 'about_modules_title' ) : 'Módulos de especialización' );
 

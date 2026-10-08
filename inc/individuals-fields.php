@@ -287,28 +287,20 @@ function thecrisisacademy_get_default_signals_rows() {
 			'source_url'   => 'https://crisisconsultant.com/icm-annual-crisis-report/',
 		),
 		array(
-			'number'       => '3.8',
-			'label'        => 'X',
-			'info'         => '<p>más probabilidades de sufrir daño reputacional severo <strong>al improvisar</strong></p>',
+			'number'       => '11',
+			'label'        => '',
+			'info'         => '<p>de pérdida del valor del mercado en <strong>solo 5 días por una mala respuesta</strong></p>',
 			'icon'         => '',
-			'source_label' => 'PwC Global Crisis Survey',
-			'source_url'   => 'https://www.pwc.com/gx/en/crisis-survey.html',
-		),
-		array(
-			'number'       => '60',
-			'label'        => 'MIN',
-			'info'         => '<p>para tomar el control de la narrativa <strong>antes de que otros lo hagan</strong></p>',
-			'icon'         => '',
-			'source_label' => 'Deloitte Reputation@Risk Report',
-			'source_url'   => 'https://www.deloitte.com/insights/reputation-risk',
+			'source_label' => 'PwC + Oxford Metrica',
+			'source_url'   => 'https://nationalpreparednesscommission.uk/2023/04/how-to-unlock-value-through-resilience-and-evolve-for-disruption/',
 		),
 		array(
 			'number'       => '',
-			'label'        => '',
-			'info'         => '<p>IA y deepfakes <strong>amplifican las crisis</strong> a una velocidad sin precedentes</p>',
-			'icon'         => 'cpu',
-			'source_label' => 'WEF Global Risks Report 2026',
-			'source_url'   => 'https://www.weforum.org/reports/global-risks-report-2026',
+			'label'        => 'Hoy una crisis puede escalar en minutos',
+			'info'         => '<p>por IA, redes sociales y desinformación</p>',
+			'icon'         => '',
+			'source_label' => 'Institute for Crisis Management (ICM)',
+			'source_url'   => 'https://crisisconsultant.com/icm-annual-crisis-report/',
 		),
 	);
 }
@@ -525,7 +517,10 @@ function thecrisisacademy_get_individuals_about_data( $post_id = null ) {
 		$modules = thecrisisacademy_get_default_about_modules_rows();
 	}
 	$gallery = get_post_meta( $post_id, 'about_gallery', true );
-	if ( empty( $gallery ) ) {
+	if ( is_string( $gallery ) && '' !== trim( $gallery ) ) {
+		$gallery = array_values( array_filter( array_map( 'intval', explode( ',', $gallery ) ) ) );
+	}
+	if ( empty( $gallery ) || ! is_array( $gallery ) ) {
 		$gallery = array( 161, 162, 163 );
 	}
 	return array(
@@ -803,6 +798,191 @@ function thecrisisacademy_render_individuals_metabox_styles() {
 			grid-template-columns: 1fr 1fr 1fr;
 			gap: 12px;
 		}
+		.tca-gallery-box {
+			background: #f8fafc;
+			border: 1px solid #cbd5e1;
+			border-radius: 8px;
+			padding: 16px;
+		}
+		.tca-gallery-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+			gap: 12px;
+			margin: 14px 0;
+			min-height: 80px;
+		}
+		.tca-gallery-item {
+			position: relative;
+			background: #fff;
+			border: 1px solid #cbd5e1;
+			border-radius: 6px;
+			overflow: hidden;
+			box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+			cursor: grab;
+			transition: transform 0.15s, box-shadow 0.15s;
+		}
+		.tca-gallery-item:hover {
+			box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+			transform: translateY(-2px);
+		}
+		.tca-gallery-item.dragging {
+			opacity: 0.5;
+			border: 2px dashed #3b82f6;
+		}
+		.tca-gallery-thumb-wrap {
+			width: 100%;
+			height: 100px;
+			background: #0f172a;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			overflow: hidden;
+		}
+		.tca-gallery-thumb-wrap img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			display: block;
+		}
+		.tca-gallery-item-footer {
+			padding: 6px 8px;
+			font-size: 11px;
+			color: #475569;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			background: #f8fafc;
+			border-top: 1px solid #f1f5f9;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.tca-gallery-item-actions {
+			display: flex;
+			gap: 2px;
+		}
+		.tca-gallery-move-btn {
+			background: none;
+			border: none;
+			color: #64748b;
+			padding: 2px 4px;
+			font-size: 11px;
+			cursor: pointer;
+			border-radius: 3px;
+		}
+		.tca-gallery-move-btn:hover {
+			background: #e2e8f0;
+			color: #1e293b;
+		}
+		.tca-gallery-remove-btn {
+			position: absolute;
+			top: 4px;
+			right: 4px;
+			width: 22px;
+			height: 22px;
+			background: rgba(220, 38, 38, 0.9);
+			color: #fff;
+			border: none;
+			border-radius: 50%;
+			font-size: 14px;
+			line-height: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			opacity: 0.85;
+			transition: opacity 0.15s, transform 0.15s;
+			z-index: 2;
+		}
+		.tca-gallery-remove-btn:hover {
+			opacity: 1;
+			transform: scale(1.1);
+			background: #dc2626;
+		}
+		.tca-gallery-empty-state {
+			grid-column: 1 / -1;
+			padding: 25px 15px;
+			text-align: center;
+			border: 2px dashed #cbd5e1;
+			border-radius: 6px;
+			color: #64748b;
+			background: #fff;
+		}
+		.tca-gallery-toolbar {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			align-items: center;
+		}
+		.tca-ind-tabs {
+			display: flex;
+			gap: 4px;
+			border-bottom: 1px solid #cbd5e1;
+			margin-bottom: 16px;
+			padding-bottom: 0;
+		}
+		.tca-ind-tabs .nav-tab {
+			cursor: pointer;
+			background: #f1f5f9;
+			border: 1px solid #cbd5e1;
+			border-bottom: none;
+			color: #475569;
+			padding: 8px 14px;
+			font-size: 13px;
+			font-weight: 600;
+			border-radius: 6px 6px 0 0;
+			transition: background 0.15s, color 0.15s;
+		}
+		.tca-ind-tabs .nav-tab:hover {
+			background: #e2e8f0;
+			color: #1e293b;
+		}
+		.tca-ind-tabs .nav-tab.nav-tab-active {
+			background: #ffffff;
+			color: #1e40af;
+			border-color: #cbd5e1;
+			border-bottom: 1px solid #ffffff;
+			margin-bottom: -1px;
+		}
+		.tca-tab-pane {
+			display: none;
+		}
+		.tca-tab-pane.is-active {
+			display: block;
+		}
+
+		/* Button & Dashicons Alignment Fix */
+		.tca-ind-wrap .button,
+		.tca-gallery-toolbar .button,
+		.postbox .inside .button.button-primary,
+		.postbox .inside .button.button-secondary {
+			display: inline-flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			gap: 6px !important;
+			vertical-align: middle !important;
+			line-height: 1.2 !important;
+			min-height: 32px !important;
+			height: auto !important;
+			padding: 4px 12px !important;
+		}
+		.tca-ind-wrap .button .dashicons,
+		.tca-gallery-toolbar .button .dashicons,
+		.postbox .inside .button.button-primary .dashicons,
+		.postbox .inside .button.button-secondary .dashicons {
+			display: inline-flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			font-size: 18px !important;
+			width: 18px !important;
+			height: 18px !important;
+			line-height: 1 !important;
+			margin: 0 !important;
+			padding: 0 !important;
+			vertical-align: middle !important;
+			position: static !important;
+			top: auto !important;
+		}
 		@media (max-width: 782px) {
 			.tca-ind-grid-2, .tca-ind-grid-3 {
 				grid-template-columns: 1fr;
@@ -851,6 +1031,9 @@ function thecrisisacademy_render_individuals_hero_metabox( $post ) {
  * 2. About Metabox Render
  */
 function thecrisisacademy_render_individuals_about_metabox( $post ) {
+	if ( function_exists( 'wp_enqueue_media' ) ) {
+		wp_enqueue_media();
+	}
 	thecrisisacademy_render_individuals_metabox_styles();
 	$data = thecrisisacademy_get_individuals_about_data( $post->ID );
 	$icon_options = function_exists( 'thecrisisacademy_get_trouble_icon_options' ) ? thecrisisacademy_get_trouble_icon_options() : array(
@@ -864,93 +1047,367 @@ function thecrisisacademy_render_individuals_about_metabox( $post ) {
 	);
 	?>
 	<div class="tca-ind-wrap">
-		<div class="tca-ind-grid-2">
+		<!-- Tabs Navigation -->
+		<nav class="nav-tab-wrapper tca-ind-tabs" role="tablist">
+			<button type="button" class="nav-tab nav-tab-active" data-tab="ind-about-tab-overview" role="tab" aria-selected="true">
+				🖼️ Galería y Textos
+			</button>
+			<button type="button" class="nav-tab" data-tab="ind-about-tab-modules" role="tab" aria-selected="false">
+				📘 Módulos de Especialización
+			</button>
+		</nav>
+
+		<!-- PESTAÑA 1: Galería y Textos Principales -->
+		<div id="ind-about-tab-overview" class="tca-tab-pane is-active" role="tabpanel">
+			<!-- Gallery Images -->
+			<div class="tca-ind-field tca-gallery-box">
+				<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+					<div>
+						<label class="tca-ind-label" style="font-size:14px; margin-bottom:2px;">🖼️ Galería de Diapositivas (Carrusel Izquierdo)</label>
+						<p class="tca-ind-desc">
+							Arrastra las imágenes para reordenar o usa los botones. Por defecto se incluyen las 3 ilustraciones locales de la academia.
+						</p>
+					</div>
+					<span class="tca-gallery-count" id="ind_gallery_counter" style="background:#e2e8f0; color:#334155; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600;">
+						<?php echo count( (array) $data['gallery'] ); ?> diapositivas
+					</span>
+				</div>
+
+				<div class="tca-gallery-grid" id="ind_about_gallery_grid">
+					<?php
+					$gallery_ids = is_array( $data['gallery'] ) ? $data['gallery'] : ( ! empty( $data['gallery'] ) ? explode( ',', (string) $data['gallery'] ) : array() );
+					$local_map   = thecrisisacademy_get_about_local_gallery_map();
+					$theme_uri   = get_stylesheet_directory_uri();
+
+					if ( ! empty( $gallery_ids ) ) :
+						foreach ( $gallery_ids as $img_id ) :
+							$img_id = (int) $img_id;
+							if ( $img_id <= 0 ) continue;
+
+							$img_url   = '';
+							$img_title = '';
+							if ( isset( $local_map[ $img_id ] ) ) {
+								$img_url   = $theme_uri . '/assets/img/about/' . $local_map[ $img_id ];
+								$img_title = $local_map[ $img_id ];
+							} else {
+								$img_url   = wp_get_attachment_image_url( $img_id, 'medium' ) ?: wp_get_attachment_url( $img_id );
+								$img_title = get_the_title( $img_id ) ?: ( 'Adjunto #' . $img_id );
+							}
+							if ( empty( $img_url ) ) {
+								$img_url = $theme_uri . '/assets/img/about/mapa-de-stakeholders.webp';
+							}
+					?>
+						<div class="tca-gallery-item" data-id="<?php echo esc_attr( $img_id ); ?>" draggable="true">
+							<button type="button" class="tca-gallery-remove-btn" title="Eliminar de la galería" aria-label="Eliminar">&times;</button>
+							<div class="tca-gallery-thumb-wrap">
+								<img src="<?php echo esc_url( $img_url ); ?>" alt="<?php echo esc_attr( $img_title ); ?>" />
+							</div>
+							<div class="tca-gallery-item-footer">
+								<span style="max-width:70px; overflow:hidden; text-overflow:ellipsis;" title="<?php echo esc_attr( $img_title ); ?>"><?php echo esc_html( $img_title ); ?></span>
+								<div class="tca-gallery-item-actions">
+									<button type="button" class="tca-gallery-move-btn tca-move-left" title="Mover a la izquierda">&larr;</button>
+									<button type="button" class="tca-gallery-move-btn tca-move-right" title="Mover a la derecha">&rarr;</button>
+								</div>
+							</div>
+						</div>
+					<?php
+						endforeach;
+					endif;
+					?>
+					<div class="tca-gallery-empty-state" id="ind_gallery_empty" style="<?php echo ! empty( $gallery_ids ) ? 'display:none;' : ''; ?>">
+						<span class="dashicons dashicons-format-gallery" style="font-size:32px; width:32px; height:32px; color:#94a3b8; margin-bottom:8px;"></span>
+						<p style="margin:4px 0 0; font-size:13px;">No hay imágenes en la galería.</p>
+						<p style="margin:2px 0 0; font-size:12px; color:#94a3b8;">Haz clic en <strong>"Añadir a la galería"</strong> o <strong>"Restaurar 3 imágenes base"</strong>.</p>
+					</div>
+				</div>
+
+				<div class="tca-gallery-toolbar">
+					<button type="button" class="button button-primary" id="ind_add_gallery_btn">
+						<span class="dashicons dashicons-plus-alt"></span>
+						<span>Añadir a la galería</span>
+					</button>
+					<button type="button" class="button button-secondary" id="ind_restore_default_gallery_btn">
+						<span class="dashicons dashicons-image-rotate"></span>
+						<span>Restaurar 3 imágenes base</span>
+					</button>
+					<button type="button" class="button button-link-delete" id="ind_clear_gallery_btn" style="margin-left:auto;">
+						Vaciar galería
+					</button>
+				</div>
+
+				<input type="hidden" name="ind_about[gallery_ids]" id="ind_about_gallery_ids" value="<?php echo esc_attr( is_array( $data['gallery'] ) ? implode( ',', $data['gallery'] ) : $data['gallery'] ); ?>" />
+			</div>
+
 			<div class="tca-ind-field">
 				<label class="tca-ind-label" for="ind_about_preheading">Subtítulo Superior</label>
 				<input type="text" id="ind_about_preheading" name="ind_about[preheading]" value="<?php echo esc_attr( $data['preheading'] ); ?>" class="large-text" />
 			</div>
+
+			<div class="tca-ind-field">
+				<label class="tca-ind-label" for="ind_about_title">Título Principal de la Sección</label>
+				<textarea id="ind_about_title" name="ind_about[title]" rows="2" class="large-text"><?php echo esc_textarea( $data['title'] ); ?></textarea>
+			</div>
+
+			<div class="tca-ind-field">
+				<label class="tca-ind-label" for="ind_about_subtitle">Subtítulo de la Sección</label>
+				<textarea id="ind_about_subtitle" name="ind_about[subtitle]" rows="2" class="large-text"><?php echo esc_textarea( $data['subtitle'] ); ?></textarea>
+			</div>
+
+			<div class="tca-ind-field">
+				<label class="tca-ind-label" for="ind_about_description">Párrafo Descriptivo</label>
+				<textarea id="ind_about_description" name="ind_about[description]" rows="3" class="large-text"><?php echo esc_textarea( $data['description'] ); ?></textarea>
+			</div>
+		</div>
+
+		<!-- PESTAÑA 2: Módulos de Especialización -->
+		<div id="ind-about-tab-modules" class="tca-tab-pane" role="tabpanel">
 			<div class="tca-ind-field">
 				<label class="tca-ind-label" for="ind_about_modules_title">Título de Módulos</label>
 				<input type="text" id="ind_about_modules_title" name="ind_about[modules_title]" value="<?php echo esc_attr( $data['modules_title'] ); ?>" class="large-text" />
 			</div>
-		</div>
 
-		<div class="tca-ind-field">
-			<label class="tca-ind-label" for="ind_about_title">Título Principal de la Sección</label>
-			<textarea id="ind_about_title" name="ind_about[title]" rows="2" class="large-text"><?php echo esc_textarea( $data['title'] ); ?></textarea>
-		</div>
-
-		<div class="tca-ind-field">
-			<label class="tca-ind-label" for="ind_about_subtitle">Subtítulo de la Sección</label>
-			<textarea id="ind_about_subtitle" name="ind_about[subtitle]" rows="2" class="large-text"><?php echo esc_textarea( $data['subtitle'] ); ?></textarea>
-		</div>
-
-		<div class="tca-ind-field">
-			<label class="tca-ind-label" for="ind_about_description">Párrafo Descriptivo</label>
-			<textarea id="ind_about_description" name="ind_about[description]" rows="3" class="large-text"><?php echo esc_textarea( $data['description'] ); ?></textarea>
-		</div>
-
-		<!-- Gallery Images -->
-		<div class="tca-ind-field" style="background:#f1f5f9; padding:14px; border-radius:6px;">
-			<label class="tca-ind-label">Galería de Diapositivas (Carrusel Izquierdo)</label>
-			<p class="tca-ind-desc" style="margin-bottom:8px;">
-				Por defecto, se cargan las 3 imágenes locales desde <code>assets/img/about/</code> (mapa-de-stakeholders.webp, radar-de-amenazas.webp, war-room.webp).
-			</p>
-			<input type="text" name="ind_about[gallery_ids]" id="ind_about_gallery_ids" value="<?php echo esc_attr( is_array( $data['gallery'] ) ? implode( ',', $data['gallery'] ) : $data['gallery'] ); ?>" class="regular-text" placeholder="161,162,163" />
-			<button type="button" class="button button-secondary" id="ind_select_gallery_btn">Seleccionar de Biblioteca</button>
-			<span class="tca-ind-desc" style="margin-left:8px;">IDs separados por comas.</span>
-		</div>
-
-		<!-- Modules Repeater -->
-		<div class="tca-ind-field">
-			<label class="tca-ind-label">Módulos de Especialización (Tarjetas 3D)</label>
-			<div id="ind-modules-container">
-				<?php foreach ( $data['modules'] as $idx => $mod ) : ?>
-					<div class="tca-ind-row">
-						<div class="tca-ind-row-header">
-							<span>Módulo #<?php echo esc_html( $idx + 1 ); ?>: <?php echo esc_html( $mod['short_title'] ?? '' ); ?></span>
-							<button type="button" class="tca-ind-del-btn" onclick="this.closest('.tca-ind-row').remove();">Eliminar</button>
-						</div>
-						<div class="tca-ind-grid-3">
-							<div>
-								<label class="tca-ind-desc">Icono</label>
-								<select name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][icon]" style="width:100%;">
-									<?php foreach ( $icon_options as $k => $label ) : ?>
-										<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $mod['icon'] ?? '', $k ); ?>><?php echo esc_html( $label ); ?></option>
-									<?php endforeach; ?>
-								</select>
+			<!-- Modules Repeater -->
+			<div class="tca-ind-field">
+				<label class="tca-ind-label">Módulos de Especialización (Tarjetas 3D)</label>
+				<div id="ind-modules-container">
+					<?php foreach ( $data['modules'] as $idx => $mod ) : ?>
+						<div class="tca-ind-row">
+							<div class="tca-ind-row-header">
+								<span>Módulo #<?php echo esc_html( $idx + 1 ); ?>: <?php echo esc_html( $mod['short_title'] ?? '' ); ?></span>
+								<button type="button" class="tca-ind-del-btn" onclick="this.closest('.tca-ind-row').remove();">Eliminar</button>
 							</div>
-							<div>
-								<label class="tca-ind-desc">Período / Etapa</label>
-								<input type="text" name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][period]" value="<?php echo esc_attr( $mod['period'] ?? '' ); ?>" class="widefat" />
+							<div class="tca-ind-grid-3">
+								<div>
+									<label class="tca-ind-desc">Icono</label>
+									<select name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][icon]" style="width:100%;">
+										<?php foreach ( $icon_options as $k => $label ) : ?>
+											<option value="<?php echo esc_attr( $k ); ?>" <?php selected( $mod['icon'] ?? '', $k ); ?>><?php echo esc_html( $label ); ?></option>
+										<?php endforeach; ?>
+									</select>
+								</div>
+								<div>
+									<label class="tca-ind-desc">Período / Etapa</label>
+									<input type="text" name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][period]" value="<?php echo esc_attr( $mod['period'] ?? '' ); ?>" class="widefat" />
+								</div>
+								<div>
+									<label class="tca-ind-desc">Etiqueta (Badge)</label>
+									<input type="text" name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][tag]" value="<?php echo esc_attr( $mod['tag'] ?? '' ); ?>" class="widefat" />
+								</div>
 							</div>
-							<div>
-								<label class="tca-ind-desc">Etiqueta (Badge)</label>
-								<input type="text" name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][tag]" value="<?php echo esc_attr( $mod['tag'] ?? '' ); ?>" class="widefat" />
+							<div class="tca-ind-grid-2" style="margin-top:8px;">
+								<div>
+									<label class="tca-ind-desc">Título Corto (Pestaña)</label>
+									<input type="text" name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][short_title]" value="<?php echo esc_attr( $mod['short_title'] ?? '' ); ?>" class="widefat" />
+								</div>
+								<div>
+									<label class="tca-ind-desc">Título Completo</label>
+									<input type="text" name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][title]" value="<?php echo esc_attr( $mod['title'] ?? '' ); ?>" class="widefat" />
+								</div>
+							</div>
+							<div style="margin-top:8px;">
+								<label class="tca-ind-desc">Descripción</label>
+								<textarea name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][description]" rows="2" class="widefat"><?php echo esc_textarea( $mod['description'] ?? '' ); ?></textarea>
 							</div>
 						</div>
-						<div class="tca-ind-grid-2" style="margin-top:8px;">
-							<div>
-								<label class="tca-ind-desc">Título Corto (Pestaña)</label>
-								<input type="text" name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][short_title]" value="<?php echo esc_attr( $mod['short_title'] ?? '' ); ?>" class="widefat" />
-							</div>
-							<div>
-								<label class="tca-ind-desc">Título Completo</label>
-								<input type="text" name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][title]" value="<?php echo esc_attr( $mod['title'] ?? '' ); ?>" class="widefat" />
-							</div>
-						</div>
-						<div style="margin-top:8px;">
-							<label class="tca-ind-desc">Descripción</label>
-							<textarea name="ind_about[modules][<?php echo esc_attr( $idx ); ?>][description]" rows="2" class="widefat"><?php echo esc_textarea( $mod['description'] ?? '' ); ?></textarea>
-						</div>
-					</div>
-				<?php endforeach; ?>
+					<?php endforeach; ?>
+				</div>
+				<button type="button" class="button button-secondary" id="ind-add-module-btn">+ Añadir Módulo</button>
 			</div>
-			<button type="button" class="button button-secondary" id="ind-add-module-btn">+ Añadir Módulo</button>
 		</div>
 	</div>
 
 	<script>
+		// Tab Switcher
+		document.querySelectorAll('.tca-ind-tabs .nav-tab').forEach(function(btn) {
+			btn.addEventListener('click', function(e) {
+				e.preventDefault();
+				var parent = this.closest('.tca-ind-wrap');
+				if (!parent) return;
+				var targetId = this.getAttribute('data-tab');
+				parent.querySelectorAll('.tca-ind-tabs .nav-tab').forEach(function(b) {
+					b.classList.remove('nav-tab-active');
+					b.setAttribute('aria-selected', 'false');
+				});
+				this.classList.add('nav-tab-active');
+				this.setAttribute('aria-selected', 'true');
+				parent.querySelectorAll('.tca-tab-pane').forEach(function(pane) {
+					pane.classList.remove('is-active');
+				});
+				var targetPane = document.getElementById(targetId);
+				if (targetPane) {
+					targetPane.classList.add('is-active');
+				}
+			});
+		});
+
+		// Gallery Manager
+		(function() {
+			var grid = document.getElementById('ind_about_gallery_grid');
+			var hiddenInput = document.getElementById('ind_about_gallery_ids');
+			var emptyState = document.getElementById('ind_gallery_empty');
+			var counter = document.getElementById('ind_gallery_counter');
+			var addBtn = document.getElementById('ind_add_gallery_btn');
+			var restoreBtn = document.getElementById('ind_restore_default_gallery_btn');
+			var clearBtn = document.getElementById('ind_clear_gallery_btn');
+
+			if (!grid || !hiddenInput) return;
+
+			function syncGallery() {
+				var items = grid.querySelectorAll('.tca-gallery-item');
+				var ids = [];
+				items.forEach(function(item) {
+					var id = item.getAttribute('data-id');
+					if (id) ids.push(id);
+				});
+				hiddenInput.value = ids.join(',');
+				if (counter) counter.textContent = ids.length + ' diapositivas';
+				if (emptyState) {
+					emptyState.style.display = ids.length === 0 ? 'block' : 'none';
+				}
+			}
+
+			grid.addEventListener('click', function(e) {
+				var removeBtn = e.target.closest('.tca-gallery-remove-btn');
+				if (removeBtn) {
+					e.preventDefault();
+					var item = removeBtn.closest('.tca-gallery-item');
+					if (item) {
+						item.remove();
+						syncGallery();
+					}
+					return;
+				}
+
+				var moveLeft = e.target.closest('.tca-move-left');
+				if (moveLeft) {
+					e.preventDefault();
+					var item = moveLeft.closest('.tca-gallery-item');
+					var prev = item ? item.previousElementSibling : null;
+					if (prev && prev !== emptyState && prev.classList.contains('tca-gallery-item')) {
+						grid.insertBefore(item, prev);
+						syncGallery();
+					}
+					return;
+				}
+
+				var moveRight = e.target.closest('.tca-move-right');
+				if (moveRight) {
+					e.preventDefault();
+					var item = moveRight.closest('.tca-gallery-item');
+					var next = item ? item.nextElementSibling : null;
+					if (next && next !== emptyState && next.classList.contains('tca-gallery-item')) {
+						grid.insertBefore(next, item);
+						syncGallery();
+					}
+					return;
+				}
+			});
+
+			// Drag & Drop
+			var draggedItem = null;
+			grid.addEventListener('dragstart', function(e) {
+				var item = e.target.closest('.tca-gallery-item');
+				if (item) {
+					draggedItem = item;
+					item.classList.add('dragging');
+					if (e.dataTransfer) {
+						e.dataTransfer.effectAllowed = 'move';
+					}
+				}
+			});
+			grid.addEventListener('dragend', function(e) {
+				if (draggedItem) {
+					draggedItem.classList.remove('dragging');
+					draggedItem = null;
+					syncGallery();
+				}
+			});
+			grid.addEventListener('dragover', function(e) {
+				e.preventDefault();
+				var targetItem = e.target.closest('.tca-gallery-item');
+				if (targetItem && targetItem !== draggedItem) {
+					var rect = targetItem.getBoundingClientRect();
+					var next = (e.clientX - rect.left) / (rect.right - rect.left) > 0.5;
+					grid.insertBefore(draggedItem, next ? targetItem.nextSibling : targetItem);
+				}
+			});
+
+			function createItemNode(id, url, title) {
+				var div = document.createElement('div');
+				div.className = 'tca-gallery-item';
+				div.setAttribute('data-id', id);
+				div.setAttribute('draggable', 'true');
+				div.innerHTML = '<button type="button" class="tca-gallery-remove-btn" title="Eliminar de la galería" aria-label="Eliminar">&times;</button>' +
+					'<div class="tca-gallery-thumb-wrap">' +
+					'<img src="' + url + '" alt="' + (title || '') + '" />' +
+					'</div>' +
+					'<div class="tca-gallery-item-footer">' +
+					'<span style="max-width:70px; overflow:hidden; text-overflow:ellipsis;" title="' + (title || '') + '">' + (title || 'Imagen') + '</span>' +
+					'<div class="tca-gallery-item-actions">' +
+					'<button type="button" class="tca-gallery-move-btn tca-move-left" title="Mover a la izquierda">&larr;</button>' +
+					'<button type="button" class="tca-gallery-move-btn tca-move-right" title="Mover a la derecha">&rarr;</button>' +
+					'</div>' +
+					'</div>';
+				return div;
+			}
+
+			if (addBtn) {
+				addBtn.addEventListener('click', function(e) {
+					e.preventDefault();
+					if (typeof wp === 'undefined' || !wp.media) {
+						alert('La biblioteca de medios no está disponible.');
+						return;
+					}
+					var frame = wp.media({
+						title: 'Añadir imágenes a la Galería de Diapositivas',
+						button: { text: 'Añadir a la galería' },
+						multiple: 'add',
+						library: { type: 'image' }
+					});
+					frame.on('select', function() {
+						var selection = frame.state().get('selection');
+						selection.each(function(attachment) {
+							var att = attachment.toJSON();
+							var imgUrl = (att.sizes && att.sizes.medium) ? att.sizes.medium.url : (att.sizes && att.sizes.thumbnail ? att.sizes.thumbnail.url : att.url);
+							var title = att.title || att.filename || ('Adjunto #' + att.id);
+							var node = createItemNode(att.id, imgUrl, title);
+							grid.insertBefore(node, emptyState);
+						});
+						syncGallery();
+					});
+					frame.open();
+				});
+			}
+
+			if (restoreBtn) {
+				restoreBtn.addEventListener('click', function(e) {
+					e.preventDefault();
+					if (!confirm('¿Restaurar las 3 imágenes por defecto de la academia?')) return;
+					grid.querySelectorAll('.tca-gallery-item').forEach(function(el) { el.remove(); });
+					var themeUri = <?php echo json_encode( get_stylesheet_directory_uri() ); ?>;
+					var defaults = [
+						{ id: 161, url: themeUri + '/assets/img/about/mapa-de-stakeholders.webp', title: 'mapa-de-stakeholders.webp' },
+						{ id: 162, url: themeUri + '/assets/img/about/radar-de-amenazas.webp', title: 'radar-de-amenazas.webp' },
+						{ id: 163, url: themeUri + '/assets/img/about/war-room.webp', title: 'war-room.webp' }
+					];
+					defaults.forEach(function(d) {
+						grid.insertBefore(createItemNode(d.id, d.url, d.title), emptyState);
+					});
+					syncGallery();
+				});
+			}
+
+			if (clearBtn) {
+				clearBtn.addEventListener('click', function(e) {
+					e.preventDefault();
+					if (!confirm('¿Estás seguro de vaciar todas las imágenes de la galería?')) return;
+					grid.querySelectorAll('.tca-gallery-item').forEach(function(el) { el.remove(); });
+					syncGallery();
+				});
+			}
+		})();
+
+		// Modules Repeater
 		document.getElementById('ind-add-module-btn')?.addEventListener('click', function() {
 			var container = document.getElementById('ind-modules-container');
 			var idx = container.children.length;
