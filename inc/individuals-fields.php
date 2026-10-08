@@ -458,13 +458,14 @@ function thecrisisacademy_get_default_how_works_panes_rows() {
  * @return array Default rows for Simulation stages.
  */
 function thecrisisacademy_get_default_simulation_stages_rows() {
+	$theme_uri = get_stylesheet_directory_uri();
 	return array(
 		array(
 			'id'        => 'radar',
 			'label'     => 'Radar de riesgos',
 			'title'     => 'Detecta la crisis antes de que estalle',
 			'desc'      => 'Monitorea señales débiles, menciones y alertas tempranas para clasificar el nivel de amenaza en tiempo real.',
-			'image'     => content_url( '/uploads/2026/05/radar.webp' ),
+			'image'     => $theme_uri . '/assets/img/simulator/radar.webp',
 			'alt'       => 'Radar de riesgos del simulador de crisis',
 			'kpi'       => 'URR',
 			'kpi_label' => 'Uso de Radar de Riesgos',
@@ -474,7 +475,7 @@ function thecrisisacademy_get_default_simulation_stages_rows() {
 			'label'     => 'Mapa de stakeholders',
 			'title'     => 'Prioriza a quién hablarle primero',
 			'desc'      => 'Identifica a las audiencias críticas, su nivel de influencia y el mensaje que cada una necesita escuchar.',
-			'image'     => content_url( '/uploads/2026/05/stakeholders-map.webp' ),
+			'image'     => $theme_uri . '/assets/img/simulator/stakeholders-map.webp',
 			'alt'       => 'Mapa de stakeholders del simulador de crisis',
 			'kpi'       => 'MPR',
 			'kpi_label' => 'Manejo de Protocolo de Respuesta',
@@ -484,7 +485,7 @@ function thecrisisacademy_get_default_simulation_stages_rows() {
 			'label'     => 'War room y simulación activa',
 			'title'     => 'Toma decisiones bajo fuego cruzado',
 			'desc'      => 'Enfrenta periodistas simulados, tendencias virales y filtraciones en una consola de respuesta en tiempo real.',
-			'image'     => content_url( '/uploads/2026/05/war-room-1.webp' ),
+			'image'     => $theme_uri . '/assets/img/simulator/war-room-1.webp',
 			'alt'       => 'War room y simulación activa del simulador de crisis',
 			'kpi'       => 'TTR',
 			'kpi_label' => 'Tiempo de Reacción y Contención',
@@ -628,6 +629,30 @@ function thecrisisacademy_get_individuals_simulation_data( $post_id = null ) {
 	$stages = get_post_meta( $post_id, 'simulation_stages', true );
 	if ( empty( $stages ) || ! is_array( $stages ) ) {
 		$stages = thecrisisacademy_get_default_simulation_stages_rows();
+	} else {
+		$theme_uri = get_stylesheet_directory_uri();
+		$fallback_map = array(
+			'radar'        => $theme_uri . '/assets/img/simulator/radar.webp',
+			'stakeholders' => $theme_uri . '/assets/img/simulator/stakeholders-map.webp',
+			'war-room'     => $theme_uri . '/assets/img/simulator/war-room-1.webp',
+		);
+		foreach ( $stages as &$stg ) {
+			$img      = $stg['image'] ?? '';
+			$stage_id = $stg['id'] ?? '';
+			// If image is empty or points to the old legacy demo uploads path, replace with local theme asset
+			if ( empty( $img ) || ( is_string( $img ) && strpos( $img, '/uploads/2026/05/' ) !== false ) ) {
+				if ( isset( $fallback_map[ $stage_id ] ) ) {
+					$stg['image'] = $fallback_map[ $stage_id ];
+				} elseif ( is_string( $img ) && strpos( $img, 'radar.webp' ) !== false ) {
+					$stg['image'] = $fallback_map['radar'];
+				} elseif ( is_string( $img ) && strpos( $img, 'stakeholders-map.webp' ) !== false ) {
+					$stg['image'] = $fallback_map['stakeholders'];
+				} elseif ( is_string( $img ) && strpos( $img, 'war-room' ) !== false ) {
+					$stg['image'] = $fallback_map['war-room'];
+				}
+			}
+		}
+		unset( $stg );
 	}
 	return array(
 		'preheading'     => get_post_meta( $post_id, 'simulation_preheading', true ) ?: 'Simulador de crisis',
@@ -1692,7 +1717,13 @@ function thecrisisacademy_render_individuals_how_works_metabox( $post ) {
  */
 function thecrisisacademy_render_individuals_simulation_metabox( $post ) {
 	thecrisisacademy_render_individuals_metabox_styles();
-	$data = thecrisisacademy_get_individuals_simulation_data( $post->ID );
+	$data           = thecrisisacademy_get_individuals_simulation_data( $post->ID );
+	$theme_uri      = get_stylesheet_directory_uri();
+	$default_images = array(
+		'radar'        => $theme_uri . '/assets/img/simulator/radar.webp',
+		'stakeholders' => $theme_uri . '/assets/img/simulator/stakeholders-map.webp',
+		'war-room'     => $theme_uri . '/assets/img/simulator/war-room-1.webp',
+	);
 	?>
 	<div class="tca-ind-wrap">
 		<div class="tca-ind-grid-2">
@@ -1733,21 +1764,33 @@ function thecrisisacademy_render_individuals_simulation_metabox( $post ) {
 
 		<div class="tca-ind-field">
 			<label class="tca-ind-label">Etapas del Simulador</label>
+			<p class="tca-ind-desc" style="margin-bottom:12px;">Configura cada etapa con su KPI asociado e imagen descriptiva (puedes seleccionarla desde la biblioteca de medios de WordPress o usar las imágenes base del tema).</p>
 			<div id="ind-sim-stages-container">
-				<?php foreach ( $data['stages'] as $idx => $stg ) : ?>
-					<div class="tca-ind-row">
+				<?php foreach ( $data['stages'] as $idx => $stg ) :
+					$stage_id    = $stg['id'] ?? '';
+					$current_img = $stg['image'] ?? '';
+					$current_alt = $stg['alt'] ?? '';
+					$default_url = $default_images[ $stage_id ] ?? '';
+					if ( empty( $default_url ) ) {
+						$keys = array_keys( $default_images );
+						if ( isset( $keys[ $idx ] ) ) {
+							$default_url = $default_images[ $keys[ $idx ] ];
+						}
+					}
+				?>
+					<div class="tca-ind-row" data-stage-index="<?php echo esc_attr( $idx ); ?>">
 						<div class="tca-ind-row-header">
-							<span>Etapa: <?php echo esc_html( $stg['label'] ?? '' ); ?></span>
+							<span>Etapa: <strong class="tca-stage-header-label"><?php echo esc_html( $stg['label'] ?? ( 'Etapa #' . ( $idx + 1 ) ) ); ?></strong></span>
 							<button type="button" class="tca-ind-del-btn" onclick="this.closest('.tca-ind-row').remove();">Eliminar</button>
 						</div>
 						<div class="tca-ind-grid-3">
 							<div>
 								<label class="tca-ind-desc">ID</label>
-								<input type="text" name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][id]" value="<?php echo esc_attr( $stg['id'] ?? '' ); ?>" class="widefat" />
+								<input type="text" name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][id]" value="<?php echo esc_attr( $stage_id ); ?>" class="widefat tca-stage-id-input" />
 							</div>
 							<div>
 								<label class="tca-ind-desc">Etiqueta / Pestaña</label>
-								<input type="text" name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][label]" value="<?php echo esc_attr( $stg['label'] ?? '' ); ?>" class="widefat" />
+								<input type="text" name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][label]" value="<?php echo esc_attr( $stg['label'] ?? '' ); ?>" class="widefat tca-stage-label-input" />
 							</div>
 							<div>
 								<label class="tca-ind-desc">KPI (Métrica)</label>
@@ -1768,21 +1811,306 @@ function thecrisisacademy_render_individuals_simulation_metabox( $post ) {
 							<label class="tca-ind-desc">Descripción</label>
 							<textarea name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][desc]" rows="2" class="widefat"><?php echo esc_textarea( $stg['desc'] ?? '' ); ?></textarea>
 						</div>
-						<div class="tca-ind-grid-2" style="margin-top:8px;">
-							<div>
-								<label class="tca-ind-desc">URL de Imagen</label>
-								<input type="text" name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][image]" value="<?php echo esc_attr( $stg['image'] ?? '' ); ?>" class="widefat" />
-							</div>
-							<div>
-								<label class="tca-ind-desc">Texto Alt de Imagen</label>
-								<input type="text" name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][alt]" value="<?php echo esc_attr( $stg['alt'] ?? '' ); ?>" class="widefat" />
+
+						<!-- Media Selector Card -->
+						<div class="tca-stage-media-card" style="margin-top:12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:12px;">
+							<label class="tca-ind-desc" style="font-weight:600; color:#334155; margin-bottom:8px; display:block;">
+								<span class="dashicons dashicons-format-image" style="vertical-align:text-bottom; margin-right:4px;"></span>
+								Imagen de la Etapa (Simulador)
+							</label>
+							<div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">
+								<div class="tca-stage-preview-box" style="width:160px; height:95px; background:#0f172a; border:1px solid #94a3b8; border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+									<img class="tca-stage-preview-img" src="<?php echo esc_url( $current_img ); ?>" alt="<?php echo esc_attr( $current_alt ); ?>" style="width:100%; height:100%; object-fit:cover; display:<?php echo ! empty( $current_img ) ? 'block' : 'none'; ?>;" />
+									<div class="tca-stage-no-img" style="color:#94a3b8; font-size:11px; text-align:center; padding:6px; display:<?php echo empty( $current_img ) ? 'block' : 'none'; ?>;">
+										<span class="dashicons dashicons-camera" style="font-size:24px; width:24px; height:24px; display:block; margin:0 auto 4px;"></span>
+										Sin imagen
+									</div>
+								</div>
+
+								<div style="flex:1; min-width:240px;">
+									<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+										<button type="button" class="button button-primary tca-select-stage-media-btn">
+											<span class="dashicons dashicons-images-alt2"></span>
+											<span>Seleccionar de la galería</span>
+										</button>
+										<?php if ( ! empty( $default_url ) ) : ?>
+											<button type="button" class="button tca-restore-stage-media-btn" data-default-url="<?php echo esc_attr( $default_url ); ?>" title="Restaurar la imagen base local de esta etapa">
+												<span class="dashicons dashicons-undo"></span>
+												<span>Imagen base</span>
+											</button>
+										<?php endif; ?>
+										<button type="button" class="button tca-remove-stage-media-btn" style="color:#b91c1c;">
+											<span class="dashicons dashicons-trash"></span>
+											<span>Quitar</span>
+										</button>
+									</div>
+
+									<div class="tca-ind-grid-2">
+										<div>
+											<label class="tca-ind-desc">URL de Imagen</label>
+											<input type="text" name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][image]" value="<?php echo esc_attr( $current_img ); ?>" class="widefat tca-stage-img-url" placeholder="https://... o ruta local" />
+										</div>
+										<div>
+											<label class="tca-ind-desc">Texto Alt de Imagen</label>
+											<input type="text" name="ind_sim[stages][<?php echo esc_attr( $idx ); ?>][alt]" value="<?php echo esc_attr( $current_alt ); ?>" class="widefat tca-stage-img-alt" placeholder="Descripción de la imagen" />
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
 				<?php endforeach; ?>
 			</div>
+
+			<div style="margin-top:12px; display:flex; gap:8px;">
+				<button type="button" class="button" id="ind-add-stage-btn">
+					<span class="dashicons dashicons-plus-alt"></span>
+					<span>Añadir Etapa</span>
+				</button>
+				<button type="button" class="button" id="ind-restore-stages-btn">
+					<span class="dashicons dashicons-image-rotate"></span>
+					<span>Restaurar 3 etapas base</span>
+				</button>
+			</div>
 		</div>
 	</div>
+
+	<script>
+	(function() {
+		var container = document.getElementById('ind-sim-stages-container');
+		if (!container) return;
+
+		var defaultImages = <?php echo json_encode( $default_images ); ?>;
+
+		// Delegate media picker, restore and remove
+		container.addEventListener('click', function(e) {
+			var selectBtn = e.target.closest('.tca-select-stage-media-btn');
+			if (selectBtn) {
+				e.preventDefault();
+				if (typeof wp === 'undefined' || !wp.media) {
+					alert('La biblioteca de medios no está disponible.');
+					return;
+				}
+				var card = selectBtn.closest('.tca-stage-media-card');
+				var urlInput = card.querySelector('.tca-stage-img-url');
+				var altInput = card.querySelector('.tca-stage-img-alt');
+				var previewImg = card.querySelector('.tca-stage-preview-img');
+				var noImg = card.querySelector('.tca-stage-no-img');
+
+				var frame = wp.media({
+					title: 'Seleccionar imagen para la etapa del simulador',
+					button: { text: 'Usar esta imagen' },
+					multiple: false,
+					library: { type: 'image' }
+				});
+
+				frame.on('select', function() {
+					var attachment = frame.state().get('selection').first().toJSON();
+					var imgUrl = attachment.url;
+					if (urlInput) urlInput.value = imgUrl;
+					if (previewImg) {
+						previewImg.src = imgUrl;
+						previewImg.style.display = 'block';
+					}
+					if (noImg) noImg.style.display = 'none';
+					if (altInput && !altInput.value && attachment.alt) {
+						altInput.value = attachment.alt;
+					}
+				});
+
+				frame.open();
+				return;
+			}
+
+			var restoreBtn = e.target.closest('.tca-restore-stage-media-btn');
+			if (restoreBtn) {
+				e.preventDefault();
+				var defaultUrl = restoreBtn.getAttribute('data-default-url');
+				if (!defaultUrl) return;
+				var card = restoreBtn.closest('.tca-stage-media-card');
+				var urlInput = card.querySelector('.tca-stage-img-url');
+				var previewImg = card.querySelector('.tca-stage-preview-img');
+				var noImg = card.querySelector('.tca-stage-no-img');
+
+				if (urlInput) urlInput.value = defaultUrl;
+				if (previewImg) {
+					previewImg.src = defaultUrl;
+					previewImg.style.display = 'block';
+				}
+				if (noImg) noImg.style.display = 'none';
+				return;
+			}
+
+			var removeBtn = e.target.closest('.tca-remove-stage-media-btn');
+			if (removeBtn) {
+				e.preventDefault();
+				var card = removeBtn.closest('.tca-stage-media-card');
+				var urlInput = card.querySelector('.tca-stage-img-url');
+				var previewImg = card.querySelector('.tca-stage-preview-img');
+				var noImg = card.querySelector('.tca-stage-no-img');
+
+				if (urlInput) urlInput.value = '';
+				if (previewImg) {
+					previewImg.src = '';
+					previewImg.style.display = 'none';
+				}
+				if (noImg) noImg.style.display = 'block';
+				return;
+			}
+		});
+
+		// Dynamic update if URL text changes manually
+		container.addEventListener('input', function(e) {
+			if (e.target.matches('.tca-stage-img-url')) {
+				var val = e.target.value.trim();
+				var card = e.target.closest('.tca-stage-media-card');
+				var previewImg = card.querySelector('.tca-stage-preview-img');
+				var noImg = card.querySelector('.tca-stage-no-img');
+				if (val) {
+					previewImg.src = val;
+					previewImg.style.display = 'block';
+					noImg.style.display = 'none';
+				} else {
+					previewImg.src = '';
+					previewImg.style.display = 'none';
+					noImg.style.display = 'block';
+				}
+			}
+			if (e.target.matches('.tca-stage-label-input')) {
+				var headerLabel = e.target.closest('.tca-ind-row').querySelector('.tca-stage-header-label');
+				if (headerLabel) headerLabel.textContent = e.target.value || 'Nueva Etapa';
+			}
+		});
+
+		// Add new stage button
+		var addBtn = document.getElementById('ind-add-stage-btn');
+		if (addBtn) {
+			addBtn.addEventListener('click', function(e) {
+				e.preventDefault();
+				var idx = container.querySelectorAll('.tca-ind-row').length;
+				var row = document.createElement('div');
+				row.className = 'tca-ind-row';
+				row.setAttribute('data-stage-index', idx);
+				row.innerHTML = '<div class="tca-ind-row-header">' +
+					'<span>Etapa: <strong class="tca-stage-header-label">Nueva Etapa</strong></span>' +
+					'<button type="button" class="tca-ind-del-btn" onclick="this.closest(\x27.tca-ind-row\x27).remove();">Eliminar</button>' +
+					'</div>' +
+					'<div class="tca-ind-grid-3">' +
+					'<div><label class="tca-ind-desc">ID</label><input type="text" name="ind_sim[stages][' + idx + '][id]" value="stage-' + (idx + 1) + '" class="widefat tca-stage-id-input" /></div>' +
+					'<div><label class="tca-ind-desc">Etiqueta / Pestaña</label><input type="text" name="ind_sim[stages][' + idx + '][label]" value="" placeholder="Etapa ' + (idx + 1) + '" class="widefat tca-stage-label-input" /></div>' +
+					'<div><label class="tca-ind-desc">KPI (Métrica)</label><input type="text" name="ind_sim[stages][' + idx + '][kpi]" value="" placeholder="KPI" class="widefat" /></div>' +
+					'</div>' +
+					'<div class="tca-ind-grid-2" style="margin-top:8px;">' +
+					'<div><label class="tca-ind-desc">Título de la Etapa</label><input type="text" name="ind_sim[stages][' + idx + '][title]" value="" class="widefat" /></div>' +
+					'<div><label class="tca-ind-desc">Etiqueta del KPI</label><input type="text" name="ind_sim[stages][' + idx + '][kpi_label]" value="" class="widefat" /></div>' +
+					'</div>' +
+					'<div style="margin-top:8px;"><label class="tca-ind-desc">Descripción</label><textarea name="ind_sim[stages][' + idx + '][desc]" rows="2" class="widefat"></textarea></div>' +
+					'<div class="tca-stage-media-card" style="margin-top:12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:12px;">' +
+					'<label class="tca-ind-desc" style="font-weight:600; color:#334155; margin-bottom:8px; display:block;"><span class="dashicons dashicons-format-image" style="vertical-align:text-bottom; margin-right:4px;"></span>Imagen de la Etapa (Simulador)</label>' +
+					'<div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">' +
+					'<div class="tca-stage-preview-box" style="width:160px; height:95px; background:#0f172a; border:1px solid #94a3b8; border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;">' +
+					'<img class="tca-stage-preview-img" src="" alt="" style="width:100%; height:100%; object-fit:cover; display:none;" />' +
+					'<div class="tca-stage-no-img" style="color:#94a3b8; font-size:11px; text-align:center; padding:6px; display:block;"><span class="dashicons dashicons-camera" style="font-size:24px; width:24px; height:24px; display:block; margin:0 auto 4px;"></span>Sin imagen</div>' +
+					'</div>' +
+					'<div style="flex:1; min-width:240px;">' +
+					'<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">' +
+					'<button type="button" class="button button-primary tca-select-stage-media-btn"><span class="dashicons dashicons-images-alt2"></span><span>Seleccionar de la galería</span></button>' +
+					'<button type="button" class="button tca-remove-stage-media-btn" style="color:#b91c1c;"><span class="dashicons dashicons-trash"></span><span>Quitar</span></button>' +
+					'</div>' +
+					'<div class="tca-ind-grid-2">' +
+					'<div><label class="tca-ind-desc">URL de Imagen</label><input type="text" name="ind_sim[stages][' + idx + '][image]" value="" class="widefat tca-stage-img-url" placeholder="https://..." /></div>' +
+					'<div><label class="tca-ind-desc">Texto Alt de Imagen</label><input type="text" name="ind_sim[stages][' + idx + '][alt]" value="" class="widefat tca-stage-img-alt" placeholder="Descripción de la imagen" /></div>' +
+					'</div>' +
+					'</div>' +
+					'</div>' +
+					'</div>';
+				container.appendChild(row);
+			});
+		}
+
+		// Restore base 3 stages button
+		var restoreStagesBtn = document.getElementById('ind-restore-stages-btn');
+		if (restoreStagesBtn) {
+			restoreStagesBtn.addEventListener('click', function(e) {
+				e.preventDefault();
+				if (!confirm('¿Restaurar las 3 etapas base originales con sus imágenes locales?')) return;
+				container.innerHTML = '';
+				var baseStages = [
+					{
+						id: 'radar',
+						label: 'Radar de riesgos',
+						title: 'Detecta la crisis antes de que estalle',
+						desc: 'Monitorea señales débiles, menciones y alertas tempranas para clasificar el nivel de amenaza en tiempo real.',
+						image: defaultImages.radar,
+						alt: 'Radar de riesgos del simulador de crisis',
+						kpi: 'URR',
+						kpi_label: 'Uso de Radar de Riesgos'
+					},
+					{
+						id: 'stakeholders',
+						label: 'Mapa de stakeholders',
+						title: 'Prioriza a quién hablarle primero',
+						desc: 'Identifica a las audiencias críticas, su nivel de influencia y el mensaje que cada una necesita escuchar.',
+						image: defaultImages.stakeholders,
+						alt: 'Mapa de stakeholders del simulador de crisis',
+						kpi: 'MPR',
+						kpi_label: 'Manejo de Protocolo de Respuesta'
+					},
+					{
+						id: 'war-room',
+						label: 'War room y simulación activa',
+						title: 'Toma decisiones bajo fuego cruzado',
+						desc: 'Enfrenta periodistas simulados, tendencias virales y filtraciones en una consola de respuesta en tiempo real.',
+						image: defaultImages['war-room'],
+						alt: 'War room y simulación activa del simulador de crisis',
+						kpi: 'TTR',
+						kpi_label: 'Tiempo de Reacción y Contención'
+					}
+				];
+				baseStages.forEach(function(stg, idx) {
+					var row = document.createElement('div');
+					row.className = 'tca-ind-row';
+					row.setAttribute('data-stage-index', idx);
+					row.innerHTML = '<div class="tca-ind-row-header">' +
+						'<span>Etapa: <strong class="tca-stage-header-label">' + stg.label + '</strong></span>' +
+						'<button type="button" class="tca-ind-del-btn" onclick="this.closest(\x27.tca-ind-row\x27).remove();">Eliminar</button>' +
+						'</div>' +
+						'<div class="tca-ind-grid-3">' +
+						'<div><label class="tca-ind-desc">ID</label><input type="text" name="ind_sim[stages][' + idx + '][id]" value="' + stg.id + '" class="widefat tca-stage-id-input" /></div>' +
+						'<div><label class="tca-ind-desc">Etiqueta / Pestaña</label><input type="text" name="ind_sim[stages][' + idx + '][label]" value="' + stg.label + '" class="widefat tca-stage-label-input" /></div>' +
+						'<div><label class="tca-ind-desc">KPI (Métrica)</label><input type="text" name="ind_sim[stages][' + idx + '][kpi]" value="' + stg.kpi + '" class="widefat" /></div>' +
+						'</div>' +
+						'<div class="tca-ind-grid-2" style="margin-top:8px;">' +
+						'<div><label class="tca-ind-desc">Título de la Etapa</label><input type="text" name="ind_sim[stages][' + idx + '][title]" value="' + stg.title + '" class="widefat" /></div>' +
+						'<div><label class="tca-ind-desc">Etiqueta del KPI</label><input type="text" name="ind_sim[stages][' + idx + '][kpi_label]" value="' + stg.kpi_label + '" class="widefat" /></div>' +
+						'</div>' +
+						'<div style="margin-top:8px;"><label class="tca-ind-desc">Descripción</label><textarea name="ind_sim[stages][' + idx + '][desc]" rows="2" class="widefat">' + stg.desc + '</textarea></div>' +
+						'<div class="tca-stage-media-card" style="margin-top:12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:12px;">' +
+						'<label class="tca-ind-desc" style="font-weight:600; color:#334155; margin-bottom:8px; display:block;"><span class="dashicons dashicons-format-image" style="vertical-align:text-bottom; margin-right:4px;"></span>Imagen de la Etapa (Simulador)</label>' +
+						'<div style="display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;">' +
+						'<div class="tca-stage-preview-box" style="width:160px; height:95px; background:#0f172a; border:1px solid #94a3b8; border-radius:6px; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0;">' +
+						'<img class="tca-stage-preview-img" src="' + stg.image + '" alt="' + stg.alt + '" style="width:100%; height:100%; object-fit:cover; display:block;" />' +
+						'<div class="tca-stage-no-img" style="color:#94a3b8; font-size:11px; text-align:center; padding:6px; display:none;"><span class="dashicons dashicons-camera" style="font-size:24px; width:24px; height:24px; display:block; margin:0 auto 4px;"></span>Sin imagen</div>' +
+						'</div>' +
+						'<div style="flex:1; min-width:240px;">' +
+						'<div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">' +
+						'<button type="button" class="button button-primary tca-select-stage-media-btn"><span class="dashicons dashicons-images-alt2"></span><span>Seleccionar de la galería</span></button>' +
+						'<button type="button" class="button tca-restore-stage-media-btn" data-default-url="' + stg.image + '"><span class="dashicons dashicons-undo"></span><span>Imagen base</span></button>' +
+						'<button type="button" class="button tca-remove-stage-media-btn" style="color:#b91c1c;"><span class="dashicons dashicons-trash"></span><span>Quitar</span></button>' +
+						'</div>' +
+						'<div class="tca-ind-grid-2">' +
+						'<div><label class="tca-ind-desc">URL de Imagen</label><input type="text" name="ind_sim[stages][' + idx + '][image]" value="' + stg.image + '" class="widefat tca-stage-img-url" placeholder="https://..." /></div>' +
+						'<div><label class="tca-ind-desc">Texto Alt de Imagen</label><input type="text" name="ind_sim[stages][' + idx + '][alt]" value="' + stg.alt + '" class="widefat tca-stage-img-alt" placeholder="Descripción de la imagen" /></div>' +
+						'</div>' +
+						'</div>' +
+						'</div>' +
+						'</div>';
+					container.appendChild(row);
+				});
+			});
+		}
+	})();
+	</script>
 	<?php
 }
 

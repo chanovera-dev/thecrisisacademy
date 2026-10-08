@@ -137,6 +137,26 @@ $is_simulator_active = ( ! empty( $sim_plugin_abs_path ) && file_exists( $sim_pl
 								$img_src = $stage['image'];
 							}
 						}
+
+						// Fallback to local simulator assets if empty or pointing to legacy uploads URL
+						if ( empty( $img_src ) || ( is_string( $img_src ) && strpos( $img_src, '/uploads/2026/05/' ) !== false ) ) {
+							$theme_uri          = get_stylesheet_directory_uri();
+							$local_fallback_map = array(
+								'radar'        => $theme_uri . '/assets/img/simulator/radar.webp',
+								'stakeholders' => $theme_uri . '/assets/img/simulator/stakeholders-map.webp',
+								'war-room'     => $theme_uri . '/assets/img/simulator/war-room-1.webp',
+							);
+							$stg_key = $stage['id'] ?? '';
+							if ( isset( $local_fallback_map[ $stg_key ] ) ) {
+								$img_src = $local_fallback_map[ $stg_key ];
+							} elseif ( is_string( $img_src ) && strpos( $img_src, 'radar' ) !== false ) {
+								$img_src = $local_fallback_map['radar'];
+							} elseif ( is_string( $img_src ) && strpos( $img_src, 'stakeholders' ) !== false ) {
+								$img_src = $local_fallback_map['stakeholders'];
+							} elseif ( is_string( $img_src ) && strpos( $img_src, 'war-room' ) !== false ) {
+								$img_src = $local_fallback_map['war-room'];
+							}
+						}
 					?>
 						<figure
 							role="tabpanel"
