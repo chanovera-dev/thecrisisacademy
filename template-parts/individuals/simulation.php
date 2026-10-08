@@ -140,7 +140,7 @@ $is_simulator_active = ( ! empty( $sim_plugin_abs_path ) && file_exists( $sim_pl
 
 						// Fallback to local simulator assets if empty or pointing to legacy uploads URL
 						if ( empty( $img_src ) || ( is_string( $img_src ) && strpos( $img_src, '/uploads/2026/05/' ) !== false ) ) {
-							$theme_uri          = get_stylesheet_directory_uri();
+							$theme_uri          = set_url_scheme( get_stylesheet_directory_uri() );
 							$local_fallback_map = array(
 								'radar'        => $theme_uri . '/assets/img/simulator/radar.webp',
 								'stakeholders' => $theme_uri . '/assets/img/simulator/stakeholders-map.webp',
@@ -157,6 +157,10 @@ $is_simulator_active = ( ! empty( $sim_plugin_abs_path ) && file_exists( $sim_pl
 								$img_src = $local_fallback_map['war-room'];
 							}
 						}
+
+						if ( ! empty( $img_src ) ) {
+							$img_src = set_url_scheme( $img_src );
+						}
 					?>
 						<figure
 							role="tabpanel"
@@ -166,7 +170,7 @@ $is_simulator_active = ( ! empty( $sim_plugin_abs_path ) && file_exists( $sim_pl
 							aria-hidden="<?php echo $is_active ? 'false' : 'true'; ?>"
 						>
 							<?php if ( ! empty( $img_src ) ) : ?>
-								<img src="<?php echo esc_url( $img_src ); ?>" width="1000" height="429" alt="<?php echo esc_attr( $img_alt ); ?>" loading="lazy" decoding="async">
+								<img src="<?php echo esc_url( $img_src ); ?>" width="1000" height="429" alt="<?php echo esc_attr( $img_alt ); ?>" loading="<?php echo $is_active ? 'eager' : 'lazy'; ?>" decoding="async" crossorigin="anonymous">
 							<?php endif; ?>
 						</figure>
 					<?php endforeach; ?>

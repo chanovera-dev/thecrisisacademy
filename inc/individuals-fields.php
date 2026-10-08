@@ -458,7 +458,7 @@ function thecrisisacademy_get_default_how_works_panes_rows() {
  * @return array Default rows for Simulation stages.
  */
 function thecrisisacademy_get_default_simulation_stages_rows() {
-	$theme_uri = get_stylesheet_directory_uri();
+	$theme_uri = set_url_scheme( get_stylesheet_directory_uri() );
 	return array(
 		array(
 			'id'        => 'radar',
@@ -630,7 +630,7 @@ function thecrisisacademy_get_individuals_simulation_data( $post_id = null ) {
 	if ( empty( $stages ) || ! is_array( $stages ) ) {
 		$stages = thecrisisacademy_get_default_simulation_stages_rows();
 	} else {
-		$theme_uri = get_stylesheet_directory_uri();
+		$theme_uri = set_url_scheme( get_stylesheet_directory_uri() );
 		$fallback_map = array(
 			'radar'        => $theme_uri . '/assets/img/simulator/radar.webp',
 			'stakeholders' => $theme_uri . '/assets/img/simulator/stakeholders-map.webp',
@@ -650,6 +650,9 @@ function thecrisisacademy_get_individuals_simulation_data( $post_id = null ) {
 				} elseif ( is_string( $img ) && strpos( $img, 'war-room' ) !== false ) {
 					$stg['image'] = $fallback_map['war-room'];
 				}
+			}
+			if ( ! empty( $stg['image'] ) && is_string( $stg['image'] ) ) {
+				$stg['image'] = set_url_scheme( $stg['image'] );
 			}
 		}
 		unset( $stg );

@@ -262,14 +262,20 @@ function initSimulatorShowcase() {
             if (images.some(img => !img)) return;
             images.forEach(img => { img.loading = 'eager'; });
 
-            // Same pipeline as Stories' .container.app (initAppSlideshow)
-            morph = setupWebGLSlider(screen, images, current);
-            if (!morph) return;
+            try {
+                // Same pipeline as Stories' .container.app (initAppSlideshow)
+                morph = setupWebGLSlider(screen, images, current);
+                if (!morph) return;
 
-            morphShown = current;
-            screen.classList.add('is-morph-ready');
-            if ('ResizeObserver' in window) {
-                new ResizeObserver(() => morph.resize()).observe(screen);
+                morphShown = current;
+                screen.classList.add('is-morph-ready');
+                if ('ResizeObserver' in window && typeof morph.resize === 'function') {
+                    new ResizeObserver(() => morph.resize()).observe(screen);
+                }
+            } catch (err) {
+                console.warn('WebGL slider failed to initialize, keeping CSS crossfade fallback:', err);
+                morph = null;
+                screen.classList.remove('is-morph-ready');
             }
         };
 
