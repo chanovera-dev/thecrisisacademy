@@ -296,8 +296,12 @@ function crisisacademy_templates() {
         }
         add_action( 'wp_enqueue_scripts', 'crisisacademy_unload_parts_header', 100 );
 
+		// Enqueue GSAP & ScrollTrigger from vendor
+        crisisacademy_enqueue_script('gsap', $a['js']['gsap']);
+        crisisacademy_enqueue_script('gsap-scrolltrigger', $a['js']['gsap-scrolltrigger'], ['gsap']);
+
         crisisacademy_enqueue_style('team-styles', $a['css']['team-styles']);
-        crisisacademy_enqueue_script('team-scripts', $a['js']['team-scripts']);
+        crisisacademy_enqueue_script('team-scripts', $a['js']['team-scripts'], ['gsap', 'gsap-scrolltrigger']);
 	}
 
 	if ( is_page_template( 'templates/page-simulator.php' ) || is_page( 'simulador-de-crisis' ) ) {
