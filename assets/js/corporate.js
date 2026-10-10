@@ -82,16 +82,35 @@ function initCardGlowEffect(selector = '.accordion-item') {
     if (!cards.length) return;
 
     cards.forEach(card => {
-        card.addEventListener('mousemove', e => {
-            if (window.innerWidth <= 768) return;
+        let rafId = null;
+        let latestEvent = null;
 
+        const updateGlow = () => {
+            rafId = null;
+            if (!latestEvent) return;
             const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = latestEvent.clientX - rect.left;
+            const y = latestEvent.clientY - rect.top;
 
             card.style.setProperty('--mouse-x', `${x}px`);
             card.style.setProperty('--mouse-y', `${y}px`);
-        });
+        };
+
+        card.addEventListener('mousemove', e => {
+            if (window.innerWidth <= 768) return;
+            latestEvent = e;
+            if (!rafId) {
+                rafId = requestAnimationFrame(updateGlow);
+            }
+        }, { passive: true });
+
+        card.addEventListener('mouseleave', () => {
+            if (rafId) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+            latestEvent = null;
+        }, { passive: true });
     });
 }
 
@@ -406,6 +425,7 @@ function initTroubleTimeline() {
     }
 
     // Dynamic mask based on scroll position of stepper
+    let stepperMaskRafId = null;
     function updateStepperMask() {
         if (!stepper || window.innerWidth < 768) return;
         const isAtTop = stepper.scrollTop <= 6;
@@ -424,6 +444,14 @@ function initTroubleTimeline() {
 
         stepper.style.maskImage = mask;
         stepper.style.webkitMaskImage = mask;
+    }
+
+    function scheduleStepperMask() {
+        if (stepperMaskRafId) return;
+        stepperMaskRafId = requestAnimationFrame(() => {
+            stepperMaskRafId = null;
+            updateStepperMask();
+        });
     }
 
     // Scroll active step into view so it is always prominently visible as it advances
@@ -723,7 +751,7 @@ function initTroubleTimeline() {
 
     // Stepper scroll listener for dynamic mask updates
     if (stepper) {
-        stepper.addEventListener('scroll', updateStepperMask, { passive: true });
+        stepper.addEventListener('scroll', scheduleStepperMask, { passive: true });
         updateStepperMask();
     }
 
@@ -906,8 +934,17 @@ function initUpcomingEventsScroll() {
         }
     };
 
-    track.addEventListener('scroll', check, { passive: true });
-    window.addEventListener('resize', check, { passive: true });
+    let checkRafId = null;
+    const scheduleCheck = () => {
+        if (checkRafId) return;
+        checkRafId = requestAnimationFrame(() => {
+            checkRafId = null;
+            check();
+        });
+    };
+
+    track.addEventListener('scroll', scheduleCheck, { passive: true });
+    window.addEventListener('resize', scheduleCheck, { passive: true });
     check();
 
     // Enable drag and click interaction on floating scrollbar
@@ -985,37 +1022,45 @@ function initUpcomingEventsOpacityCascade() {
     const MIN_VIS = 0.30;   // minimum opacity while still visible
     const OFF = 0.25;   // opacity for off-screen cards
 
+    let cascadeRafId = null;
     function update() {
         const trackLeft = track.scrollLeft;
         const trackRight = trackLeft + track.clientWidth;
 
-        // Classify each card
-        const visible = [];
-
-        cards.forEach(card => {
-            // offsetLeft is relative to scrollable parent
+        // 1. Batch geometry reads first
+        const cardMetrics = cards.map(card => {
             const cardLeft = card.offsetLeft;
             const cardRight = cardLeft + card.offsetWidth;
+            return {
+                card,
+                cardLeft,
+                cardRight,
+                isFeatured: card.classList.contains('event-card--featured')
+            };
+        });
 
-            // Consider visible if at least 30px of the card is inside the track
-            const overlap = Math.min(cardRight, trackRight) - Math.max(cardLeft, trackLeft);
+        // 2. Classify visibility and sorting
+        const visible = [];
+        const toDim = [];
 
+        cardMetrics.forEach(metric => {
+            const overlap = Math.min(metric.cardRight, trackRight) - Math.max(metric.cardLeft, trackLeft);
             if (overlap >= 30) {
-                visible.push({ card, cardLeft });
-            } else {
-                // Off-screen — skip featured
-                if (!card.classList.contains('event-card--featured')) {
-                    card.style.opacity = OFF;
-                }
+                visible.push(metric);
+            } else if (!metric.isFeatured) {
+                toDim.push(metric.card);
             }
         });
 
-        // Sort left-to-right so position 0 is always the leftmost visible
         visible.sort((a, b) => a.cardLeft - b.cardLeft);
 
-        visible.forEach(({ card }, i) => {
-            // Featured card is always fully opaque
-            if (card.classList.contains('event-card--featured')) {
+        // 3. Batch style writes second
+        toDim.forEach(card => {
+            card.style.opacity = OFF;
+        });
+
+        visible.forEach(({ card, isFeatured }, i) => {
+            if (isFeatured) {
                 card.style.opacity = '1';
                 return;
             }
@@ -1024,8 +1069,16 @@ function initUpcomingEventsOpacityCascade() {
         });
     }
 
-    track.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update, { passive: true });
+    const scheduleUpdate = () => {
+        if (cascadeRafId) return;
+        cascadeRafId = requestAnimationFrame(() => {
+            cascadeRafId = null;
+            update();
+        });
+    };
+
+    track.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate, { passive: true });
 
     // Run once after layout is ready
     requestAnimationFrame(update);
@@ -1591,17 +1644,20 @@ class CorporateSlideshow {
             // Instantly jump to ∓90° on the other side
             this.flipTarget.style.transition = 'none';
             this.flipTarget.style.transform = `rotateY(${phase2Angle}deg)`;
-            void this.flipTarget.offsetWidth; // Force reflow
 
-            // Phase 2: rotate ∓90° → 0° (card "comes back")
-            this.flipTarget.style.transition = `transform ${halfDuration}ms cubic-bezier(0, 0, 0.6, 1)`;
-            this.flipTarget.style.transform = 'rotateY(0deg)';
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    // Phase 2: rotate ∓90° → 0° (card "comes back")
+                    this.flipTarget.style.transition = `transform ${halfDuration}ms cubic-bezier(0, 0, 0.6, 1)`;
+                    this.flipTarget.style.transform = 'rotateY(0deg)';
 
-            setTimeout(() => {
-                this.flipTarget.style.transition = '';
-                this.flipTarget.style.transform = '';
-                this.isAnimating = false;
-            }, halfDuration);
+                    setTimeout(() => {
+                        this.flipTarget.style.transition = '';
+                        this.flipTarget.style.transform = '';
+                        this.isAnimating = false;
+                    }, halfDuration);
+                });
+            });
         }, halfDuration);
     }
 
@@ -1719,10 +1775,13 @@ function initStickyOverlapEffect() {
         }
 
         const vh = window.innerHeight;
+        // Batch all scrollHeight reads before writing any styles to avoid layout thrashing
+        const heights = blocks.map(block => block.scrollHeight);
+
         blocks.forEach((block, index) => {
             block.style.position = 'sticky';
             block.style.zIndex = index + 1;
-            const bh = block.scrollHeight;
+            const bh = heights[index];
             // Negative top: section scrolls until its bottom hits the viewport bottom,
             // then sticks — ensuring the user sees ALL content before overlap.
             block.style.top = bh > vh ? `${vh - bh}px` : '0px';
@@ -1741,6 +1800,7 @@ function initStickyOverlapEffect() {
         blocks.forEach(block => ro.observe(block));
     }
 
+    let overlapTicking = false;
     function updateOverlap() {
         if (window.innerWidth < 1024) {
             blocks.forEach(block => {
@@ -1754,11 +1814,13 @@ function initStickyOverlapEffect() {
 
         const states = [];
         const threshold = window.innerHeight * 0.5;
+        // Batch geometry reads
         for (let i = 0; i < blocks.length - 1; i++) {
             const nextTop = blocks[i + 1].getBoundingClientRect().top;
             states.push(nextTop <= threshold);
         }
 
+        // Batch class toggles and events
         for (let i = 0; i < states.length; i++) {
             const block = blocks[i];
             const shouldBeBottom = states[i];
@@ -1777,7 +1839,16 @@ function initStickyOverlapEffect() {
         }
     }
 
-    window.addEventListener('scroll', updateOverlap, { passive: true });
+    function onScrollOverlap() {
+        if (overlapTicking) return;
+        overlapTicking = true;
+        requestAnimationFrame(() => {
+            overlapTicking = false;
+            updateOverlap();
+        });
+    }
+
+    window.addEventListener('scroll', onScrollOverlap, { passive: true });
     updateOverlap();
 }
 
@@ -2034,21 +2105,19 @@ function initUnifiedAnimations() {
             if (rect.bottom <= 0 || (block && block.classList.contains('is-bottom'))) {
                 instantList.push(el);
             } else {
-                staggerList.push(el);
+                staggerList.push({ el, top: rect.top, left: rect.left });
             }
         });
 
         // Instant reveal for elements already scrolled past
         instantList.forEach(el => revealElement(el, true));
 
-        // Spatial sort (top-to-bottom, left-to-right) for elements visible in the active viewport
+        // Spatial sort (top-to-bottom, left-to-right) using cached coordinates without DOM reads
         staggerList.sort((a, b) => {
-            const rectA = a.getBoundingClientRect();
-            const rectB = b.getBoundingClientRect();
-            if (Math.abs(rectA.top - rectB.top) < 40) {
-                return rectA.left - rectB.left;
+            if (Math.abs(a.top - b.top) < 40) {
+                return a.left - b.left;
             }
-            return rectA.top - rectB.top;
+            return a.top - b.top;
         });
 
         function scheduleReveal(el, delay) {
@@ -2073,9 +2142,9 @@ function initUnifiedAnimations() {
         }
 
         // Rapid, non-blocking stagger (50ms per item, capped at 300ms max so no element waits long)
-        staggerList.forEach((el, index) => {
+        staggerList.forEach((item, index) => {
             const delay = Math.min(index * 50, 300);
-            scheduleReveal(el, delay);
+            scheduleReveal(item.el, delay);
         });
 
     }, {
@@ -2084,10 +2153,14 @@ function initUnifiedAnimations() {
     });
 
     // Check all targets on initialization:
-    // If element is already above the current viewport, reveal immediately without observing
-    allTargets.forEach(el => {
-        const rect = el.getBoundingClientRect();
-        const block = el.closest('.block');
+    // Batch all geometry reads first before calling revealElement which mutates DOM styles
+    const targetMetrics = allTargets.map(el => ({
+        el,
+        rect: el.getBoundingClientRect(),
+        block: el.closest('.block')
+    }));
+
+    targetMetrics.forEach(({ el, rect, block }) => {
         if (rect.bottom < 0 || (block && block.classList.contains('is-bottom'))) {
             revealElement(el, true);
         } else {

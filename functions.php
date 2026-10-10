@@ -242,12 +242,11 @@ function crisisacademy_templates() {
         }
         add_action( 'wp_enqueue_scripts', 'crisisacademy_unload_parts_header', 100 );
 
-		// Enqueue GSAP & ScrollTrigger from vendor
+		// Enqueue GSAP from vendor
         crisisacademy_enqueue_script('gsap', $a['js']['gsap']);
-        crisisacademy_enqueue_script('gsap-scrolltrigger', $a['js']['gsap-scrolltrigger'], ['gsap']);
 
         crisisacademy_enqueue_style('corporate-styles', $a['css']['corporate-styles']);
-        crisisacademy_enqueue_script('corporate-scripts', $a['js']['corporate-scripts'], ['gsap', 'gsap-scrolltrigger']);
+        crisisacademy_enqueue_script('corporate-scripts', $a['js']['corporate-scripts'], ['gsap']);
         crisisacademy_enqueue_script('corporate-hero', $a['js']['corporate-hero'], ['gsap', 'corporate-scripts']);
 
 		// Localize AJAX script parameters for corporate page
