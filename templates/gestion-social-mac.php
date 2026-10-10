@@ -61,10 +61,10 @@ get_header(); ?>
                 transition: opacity 0.3s ease;
 
                 &.is-disabled {
-                    opacity: 0.75;
+                    opacity: 0.5;
 
                     & .phase-title {
-                        opacity: 0.6;
+                        opacity: 0.5;
                     }
                 }
 
