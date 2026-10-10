@@ -186,6 +186,7 @@ function crisisacademy_get_assets()
             'corporate-styles' => $assets_path . '/css/corporate.css',
 			'individuals-styles' => $assets_path . '/css/individuals.css',
 			'simulator-styles' => $assets_path . '/css/simulator.css',
+			'team-styles' => $assets_path . '/css/team.css'
         ],
         'js' => [
             'gsap' => $assets_path . '/js/vendor/gsap.min.js',
@@ -194,7 +195,8 @@ function crisisacademy_get_assets()
 			'individuals-scripts' => $assets_path . '/js/individuals.js',
 			'individuals-hero' => $assets_path . '/js/individuals-hero.js',
             'corporate-hero'    => $assets_path . '/js/corporate-hero.js',
-			'simulator-scripts' => $assets_path . '/js/simulator.js'
+			'simulator-scripts' => $assets_path . '/js/simulator.js',
+			'team-scripts' => $assets_path . '/js/team.js'
         ]
     ];
 }
@@ -282,6 +284,20 @@ function crisisacademy_templates() {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('thecrisisacademy_news_nonce'),
         ));
+	}
+
+	if (is_page_template('templates/team.php')) {
+		$a = crisisacademy_get_assets();
+
+        function crisisacademy_unload_parts_header() {
+            wp_dequeue_style( 'page' );
+			wp_dequeue_style( 'stories-single' );
+			wp_deregister_style( 'stories-single' );
+        }
+        add_action( 'wp_enqueue_scripts', 'crisisacademy_unload_parts_header', 100 );
+
+        crisisacademy_enqueue_style('team-styles', $a['css']['team-styles']);
+        crisisacademy_enqueue_script('team-scripts', $a['js']['team-scripts']);
 	}
 
 	if ( is_page_template( 'templates/page-simulator.php' ) || is_page( 'simulador-de-crisis' ) ) {
