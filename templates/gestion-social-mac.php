@@ -109,7 +109,7 @@ get_header(); ?>
 
                     & .card {
                         background-color: #fff;
-                        border-radius: var(--minibadge-border-radius);
+                        border-radius: var(--badge-border-radius);
                         box-shadow: var(--shadow-card);
                         border: 1px solid #cbd5e1;
                         overflow: hidden;
@@ -209,9 +209,9 @@ get_header(); ?>
                                 }
 
                                 &.attention {
-                                    color: #584205ff;
-                                    background-color: #fff7e0ff;
-                                    border-color: #fece43;
+                                    color: #216d3d;
+                                    background-color: #dcfce7;
+                                    border-color: #8cefb1;
                                 }
                             }
 
@@ -908,8 +908,8 @@ get_header(); ?>
                 path5Loop.style.opacity = '0';
             }
 
-            // 6. Salida: Compromiso de plazo -> Matriz de riesgo -> Registro (Flujo naranja / Criterios de riesgo)
-            if (isPhase03Completed && currentTheme === 'orange' && cardCompromiso && cardMatriz && cardRegistro) {
+            // 6. Salida: Compromiso de plazo -> Matriz de riesgo -> Registro (Flujo naranja y rojo / Criterios de riesgo y Protocolo de alerta roja)
+            if (isPhase03Completed && (currentTheme === 'orange' || currentTheme === 'red') && cardCompromiso && cardMatriz && cardRegistro) {
                 const compRect = cardCompromiso.getBoundingClientRect();
                 const matrizRect = cardMatriz.getBoundingClientRect();
                 const regRect = cardRegistro.getBoundingClientRect();
@@ -920,7 +920,7 @@ get_header(); ?>
                     const yBottom1 = compRect.bottom - svgRect.top;
                     const yTop1 = matrizRect.top - svgRect.top;
                     pathCompMatriz.setAttribute('d', `M ${xMid1} ${yBottom1} L ${xMid1} ${yTop1}`);
-                    pathCompMatriz.setAttribute('stroke', getThemeColor('orange'));
+                    pathCompMatriz.setAttribute('stroke', getThemeColor(currentTheme));
                     pathCompMatriz.style.opacity = '1';
                 } else if (pathCompMatriz) {
                     pathCompMatriz.style.opacity = '0';
@@ -932,7 +932,7 @@ get_header(); ?>
                     const yBottom2 = matrizRect.bottom - svgRect.top;
                     const yTop2 = regRect.top - svgRect.top;
                     pathMatrizRegistro.setAttribute('d', `M ${xMid2} ${yBottom2} L ${xMid2} ${yTop2}`);
-                    pathMatrizRegistro.setAttribute('stroke', getThemeColor('orange'));
+                    pathMatrizRegistro.setAttribute('stroke', getThemeColor(currentTheme));
                     pathMatrizRegistro.style.opacity = '1';
                 } else if (pathMatrizRegistro) {
                     pathMatrizRegistro.style.opacity = '0';
@@ -1083,10 +1083,10 @@ get_header(); ?>
             cardCompromiso.classList.add(currentTheme);
             cardCompromiso.classList.add('is-selectable', 'is-selected');
 
-            // 2. Matriz de riesgo: se activa cuando corresponde a Queja (orange)
-            if (currentTheme === 'orange') {
+            // 2. Matriz de riesgo: se activa cuando corresponde a Queja (orange) o Crisis (red)
+            if (currentTheme === 'orange' || currentTheme === 'red') {
                 cardMatriz.classList.remove('is-disabled');
-                cardMatriz.classList.add('orange', 'is-selectable', 'is-selected');
+                cardMatriz.classList.add(currentTheme, 'is-selectable', 'is-selected');
             } else {
                 cardMatriz.classList.add('is-disabled');
                 cardMatriz.classList.remove('blue', 'orange', 'red', 'is-selectable', 'is-selected');
