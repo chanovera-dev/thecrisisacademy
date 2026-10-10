@@ -31,9 +31,10 @@ if ( empty( $panes ) ) {
 	$article_number  = $pane['article_number'] ?? '';
 	$article_title   = $pane['article_title'] ?? '';
 	$article_content = $pane['article_content'] ?? '';
+	$alt_pane_id     = ( 'how-works-pi6m' === $pane_id ) ? 'how-works-fec' : ( ( 'how-works-fec' === $pane_id ) ? 'how-works-pi6m' : '' );
 ?>
 <!-- Pane: <?php echo esc_html( $pane_title ); ?> -->
-<div class="corporate-lightbox-pane" id="pane-<?php echo esc_attr( $pane_id ); ?>" data-pane="<?php echo esc_attr( $pane_id ); ?>" data-title="<?php echo esc_attr( $pane_title ); ?>">
+<div class="corporate-lightbox-pane" id="pane-<?php echo esc_attr( $pane_id ); ?>" data-pane="<?php echo esc_attr( $pane_id ); ?>"<?php echo ! empty( $alt_pane_id ) ? ' data-alt-pane="' . esc_attr( $alt_pane_id ) . '"' : ''; ?> data-title="<?php echo esc_attr( $pane_title ); ?>">
 	<article class="lightbox-article">
 		<header class="lightbox-article-header">
 			<?php if ( ! empty( $article_number ) ) : ?>

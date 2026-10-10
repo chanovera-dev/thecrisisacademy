@@ -409,7 +409,7 @@ function thecrisisacademy_get_default_how_works_items_rows() {
 			'lightbox_target' => 'how-works-mpc',
 		),
 		array(
-			'department'      => 'pi6m',
+			'department'      => 'fec',
 			'radar_code'      => 'FEC',
 			'number'          => '03',
 			'title'           => 'Formación de Especialistas y Comités',

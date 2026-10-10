@@ -130,7 +130,7 @@ function initCorporateLightbox() {
         // Activate requested pane or default to first
         let targetPane = null;
         panes.forEach(pane => {
-            const matches = !paneId || pane.dataset.pane === paneId;
+            const matches = !paneId || pane.dataset.pane === paneId || pane.dataset.altPane === paneId;
             pane.classList.toggle('active', matches);
             if (matches) targetPane = pane;
         });

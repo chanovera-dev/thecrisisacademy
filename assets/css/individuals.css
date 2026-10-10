@@ -2338,7 +2338,10 @@
                 }
             }
 
-            /* 3. PI6M - Bottom-right sector (120° from 60° to 180°) */
+            /* 3. FEC / PI6M - Bottom-right sector (120° from 60° to 180°) */
+            &.q-fec,
+            &.fec,
+            &[data-target="fec"],
             &.q-pi6m,
             &.pi6m,
             &[data-target="pi6m"] {
