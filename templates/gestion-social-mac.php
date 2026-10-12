@@ -289,7 +289,7 @@ get_header(); ?>
                         </header>
                         <div class="card-body">
                             <ul>
-                                <li class="item"><b>Base de datos:</b> Se guarda cada ciclo con folio correlativo ńico institucional</li>
+                                <li class="item"><b>Base de datos:</b> Se guarda cada ciclo con folio correlativo único institucional</li>
                                 <li class="item"><b>Impresión a PDF:</b> Entrega e impresión inmediata del informe oficial con todas las respuestas</li>
                             </ul>
                         </div>
