@@ -38,6 +38,15 @@ body {
    width: 100%;
 }
 
+#main-header {
+   & .main-header--backdrop {
+      &::after {
+         background-color: #04072229;
+      }
+   }
+}
+
+
 /* Base Theme Structure */
 .site {
    display: flex;
