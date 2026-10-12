@@ -572,9 +572,212 @@ function initUnifiedAnimations() {
 }
 
 /**
+ * Hero Data-Block Split-Flap 3D Display (#hero-data-board).
+ * Transforms the entire .data-block into a mechanical split-flap card divided horizontally,
+ * flipping downward in 3D while preserving the block's isometric perspective.
+ */
+function initHeroDataBlockSplitFlap() {
+    const container = document.getElementById('hero-data-board');
+    if (!container) return;
+
+    const dataScript = container.querySelector('.db-data-source');
+    if (!dataScript) return;
+
+    let items = [];
+    try {
+        items = JSON.parse(dataScript.textContent.trim());
+    } catch (e) {
+        console.error('Data-block split-flap JSON parse error:', e);
+        return;
+    }
+    if (!items.length) return;
+
+    const dataBlock = container.querySelector('.data-block');
+    const plateTopBg = container.querySelector('.db-plate-top-bg');
+    const plateBottomBg = container.querySelector('.db-plate-bottom-bg');
+    const leafTop = container.querySelector('.db-leaf-top');
+    const leafTopShadow = leafTop ? leafTop.querySelector('.db-shadow') : null;
+    const leafBottom = container.querySelector('.db-leaf-bottom');
+    const leafBottomShadow = leafBottom ? leafBottom.querySelector('.db-shadow') : null;
+    const dots = Array.from(container.querySelectorAll('.point-dot'));
+
+    if (!dataBlock || !plateTopBg || !plateBottomBg || !leafTop || !leafBottom) return;
+
+    let currentIndex = 0;
+    let isFlipping = false;
+    let timer = null;
+    let isHovered = false;
+    const intervalDuration = 3500;
+
+    function updatePlateText(plate, item) {
+        if (!plate || !item) return;
+        const num = plate.querySelector('.stat-number');
+        const lbl = plate.querySelector('.stat-label');
+        if (num) num.textContent = item.number;
+        if (lbl) lbl.textContent = item.label;
+    }
+
+    // Initialize plate values to resting state (item 0)
+    updatePlateText(plateTopBg, items[currentIndex]);
+    updatePlateText(plateBottomBg, items[currentIndex]);
+    updatePlateText(leafTop, items[currentIndex]);
+    updatePlateText(leafBottom, items[currentIndex]);
+
+    function flipTo(targetIndex) {
+        if (isFlipping || targetIndex === currentIndex) return;
+        isFlipping = true;
+
+        const incomingItem = items[targetIndex];
+        const currentItem = items[currentIndex];
+
+        // 1. Update navigation dots immediately for instant tactile feedback
+        dots.forEach((dot, idx) => {
+            const active = idx === targetIndex;
+            dot.classList.toggle('is-active', active);
+            dot.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+
+        // 2. Prepare plate contents for the split-flap drop
+        updatePlateText(plateTopBg, incomingItem);
+        updatePlateText(plateBottomBg, currentItem);
+        updatePlateText(leafTop, currentItem);
+        updatePlateText(leafBottom, incomingItem);
+
+        // 3. Perform GSAP 3D Split-Flap Animation (single continuous mechanical drop)
+        if (window.gsap) {
+            gsap.set(leafTop, { rotateX: 0, visibility: 'visible' });
+            gsap.set(leafTopShadow, { opacity: 0 });
+            gsap.set(leafBottom, { rotateX: 90, visibility: 'hidden' });
+            gsap.set(leafBottomShadow, { opacity: 0.7 });
+
+            const flapHalfTime = 0.14; // Snappy 140ms per half -> 280ms total fluid continuous flip
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    currentIndex = targetIndex;
+                    isFlipping = false;
+
+                    // Restore top leaf with incoming item at resting state (0deg)
+                    updatePlateText(leafTop, incomingItem);
+                    gsap.set(leafTop, { rotateX: 0, visibility: 'visible' });
+                    gsap.set(leafTopShadow, { opacity: 0 });
+
+                    // Hide and reset bottom leaf for next flip
+                    gsap.set(leafBottom, { rotateX: 90, visibility: 'hidden' });
+                    gsap.set(leafBottomShadow, { opacity: 0.7 });
+
+                    // Sync all background plates to current resting state
+                    updatePlateText(plateBottomBg, incomingItem);
+                    updatePlateText(plateTopBg, incomingItem);
+                    updatePlateText(leafBottom, incomingItem);
+                }
+            });
+
+            // Phase 1: Top leaf falls forward down to the center seam (-90deg), accelerating
+            tl.to(leafTop, {
+                rotateX: -90,
+                duration: flapHalfTime,
+                ease: 'power1.in'
+            });
+            tl.to(leafTopShadow, {
+                opacity: 0.7,
+                duration: flapHalfTime,
+                ease: 'power1.in'
+            }, 0);
+
+            // Midpoint handoff at the seam: seamless instantaneous swap at 90deg edge
+            tl.set(leafTop, { visibility: 'hidden' });
+            tl.set(leafBottom, { visibility: 'visible' });
+
+            // Phase 2: Bottom leaf continues the fall from 90deg down to 0deg, matching velocity
+            tl.to(leafBottom, {
+                rotateX: 0,
+                duration: flapHalfTime,
+                ease: 'power1.out'
+            });
+            tl.to(leafBottomShadow, {
+                opacity: 0,
+                duration: flapHalfTime,
+                ease: 'power1.out'
+            }, `-=${flapHalfTime}`);
+        } else {
+            // Fallback without GSAP
+            currentIndex = targetIndex;
+            updatePlateText(plateTopBg, incomingItem);
+            updatePlateText(plateBottomBg, incomingItem);
+            updatePlateText(leafTop, incomingItem);
+            updatePlateText(leafBottom, incomingItem);
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('is-active', idx === currentIndex);
+            });
+            isFlipping = false;
+        }
+    }
+
+    function next() {
+        const nextIdx = (currentIndex + 1) % items.length;
+        flipTo(nextIdx);
+    }
+
+    function startTimer() {
+        stopTimer();
+        if (isHovered) return;
+        timer = setInterval(next, intervalDuration);
+    }
+
+    function stopTimer() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+    }
+
+    // Pagination dots click
+    dots.forEach((dot, idx) => {
+        dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            flipTo(idx);
+            startTimer();
+        });
+    });
+
+    // Data-block click advances to next
+    dataBlock.addEventListener('click', () => {
+        next();
+        startTimer();
+    });
+
+    // Pause on hover
+    container.addEventListener('mouseenter', () => {
+        isHovered = true;
+        stopTimer();
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isHovered = false;
+        startTimer();
+    });
+
+    // Viewport IntersectionObserver
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                startTimer();
+            } else {
+                stopTimer();
+            }
+        }, { threshold: 0.1 });
+        observer.observe(container);
+    } else {
+        startTimer();
+    }
+}
+
+/**
  * Main initialization runner.
  */
 function initCorporateScripts() {
+    initHeroDataBlockSplitFlap();
     initAccordionInteractiveList();
     initCardGlowEffect('.accordion-item, .animated-card, #cta .content, .cta-spotlight-layer, .sdc-card, .sdc-metric-card, #hero, .blue-background-00, .white-background-00, .white-background-01, .data-block, .timeline-card-front');
     // initCorporateLightbox();
