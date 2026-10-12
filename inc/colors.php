@@ -39,7 +39,7 @@ function thecrisisacademy_register_color_schemes( $schemes ) {
 			'--color-tertiary'             => '#80baff',
 			'--color-quaternary'           => '#b3d4ff',
 			'--bg-body'                    => '#ebe8e6',
-			'--border-light'               => '#f3f1f0',
+			'--border-light'               => '#04072229',
 			'--header-background'          => '#e6edf8',
 			'--footer-background'          => '#040722',
 			'--accent-background-1'        => '#0c3875',
